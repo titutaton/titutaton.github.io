@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Титутатон</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Podkova:wght@600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --ground:#E7EFE6;
+  --ground-2:#F5F9F2;
+  --mound:#CBDEC6;
+  --mound-2:#B6D0B1;
+  --ink:#2F2B3C;
+  --ink-soft:#6C6579;
+  --line:#D3DFD1;
+  --card:rgba(255,255,255,.72);
+  --shadow:rgba(47,43,60,.13);
+
+  --ti:#69CBB6;  --ti-deep:#3FA894;  --ti-soft:#B7EADF;
+  --tu:#F0A15C;  --tu-deep:#CE7A33;  --tu-soft:#FBD9B6;
+  --ta:#B694E8;  --ta-deep:#8C69C4;  --ta-soft:#DFCCF7;
+  --ton:#5A6CA3; --ton-deep:#3C4C7E; --ton-soft:#C6CFEA;
+  --ton-chip-ink:#F2F5FF;
+  --moss:#6E9A63;
+
+  --accent:#D9426D;
+  --eye:#2B2333;
+  --eye-shine:#FFFFFF;
+  --mouth:#6B2440;
+  --chip-ink:#241D2E;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#191520;
+    --ground-2:#221B2C;
+    --mound:#2C4636;
+    --mound-2:#35543F;
+    --ink:#F4EBF3;
+    --ink-soft:#B3A6BE;
+    --line:#3A3046;
+    --card:rgba(40,32,52,.66);
+    --shadow:rgba(0,0,0,.4);
+    --ti:#7DE2CB;  --ti-deep:#49B7A1;  --ti-soft:#2C4C4B;
+    --tu:#FFB775;  --tu-deep:#D98C43;  --tu-soft:#4E3A2A;
+    --ta:#C9A9F5;  --ta-deep:#9C7AD4;  --ta-soft:#3D3155;
+    --ton:#8FA1DE; --ton-deep:#6274B4; --ton-soft:#2F3859;
+    --ton-chip-ink:#1B2036;
+    --moss:#8FBE82;
+    --accent:#FF8FAC;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#191520;
+  --ground-2:#221B2C;
+  --mound:#2C4636;
+  --mound-2:#35543F;
+  --ink:#F4EBF3;
+  --ink-soft:#B3A6BE;
+  --line:#3A3046;
+  --card:rgba(40,32,52,.66);
+  --shadow:rgba(0,0,0,.4);
+  --ti:#7DE2CB;  --ti-deep:#49B7A1;  --ti-soft:#2C4C4B;
+  --tu:#FFB775;  --tu-deep:#D98C43;  --tu-soft:#4E3A2A;
+  --ta:#C9A9F5;  --ta-deep:#9C7AD4;  --ta-soft:#3D3155;
+  --ton:#8FA1DE; --ton-deep:#6274B4; --ton-soft:#2F3859;
+  --ton-chip-ink:#1B2036;
+  --moss:#8FBE82;
+  --accent:#FF8FAC;
+}
+
+*{box-sizing:border-box}
+/* Полоса прокрутки всегда занимает своё место: иначе на короткой странице
+   колонка съезжает на полполосы, и при переходе шапка прыгает. */
+html{scrollbar-gutter:stable}
+body{
+  overflow-x:clip;
+  margin:0;
+  background:
+    radial-gradient(900px 420px at 12% -8%, var(--ground-2), transparent 70%),
+    radial-gradient(700px 380px at 92% 4%, var(--ground-2), transparent 65%),
+    var(--ground);
+  color:var(--ink);
+  font-family:"Nunito","Segoe UI",system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  -webkit-text-size-adjust:100%;
+}
+.page{max-width:1020px;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(12px,3vw,28px) 48px;}
+
+/* ---------- шапка ---------- */
+.banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.eyebrow{
+  margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(10px,2.6vw,12px);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+}
+h1{
+  margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;
+  font-size:clamp(30px,6.4vw,50px);line-height:1.02;letter-spacing:-.01em;text-wrap:balance;
+}
+h1 .s{display:inline-block}
+h1 .s:nth-child(1){color:var(--ti-deep)}
+h1 .s:nth-child(2){color:var(--tu-deep)}
+h1 .s:nth-child(3){color:var(--ta-deep)}
+h1 .s:nth-child(4){color:var(--ton-deep)}
+.lede{margin:0;max-width:56ch;color:var(--ink-soft);font-size:clamp(14.5px,3.4vw,17.5px);text-wrap:pretty}
+
+/* ---------- поляна ---------- */
+.glade{
+  position:relative;margin:clamp(12px,3vw,30px) 0 0;padding:22px 0 clamp(8px,1vw,12px);
+  display:grid;grid-template-columns:repeat(4,auto);justify-content:center;align-items:end;
+  gap:clamp(2px,1.6vw,26px);
+}
+/* Кочка — та же поляна, что на карточке, и тем же кодом: контур считает
+   fluffI. Держится ширины колонки, как панели под ней, и не растягивается:
+   высота идёт за шириной сама. */
+.mound{
+  position:absolute;left:0;right:0;bottom:0;z-index:0;pointer-events:none;line-height:0;
+  height:clamp(150px,20vw,220px);
+  border-radius:22px 22px 0 0;overflow:hidden;   /* тот же скруглённый край, что у панелей ниже */
+}
+.mound svg{display:block;width:100%;height:100%}
+
+/* ---------- существа ---------- */
+.critter{
+  position:relative;z-index:1;
+  appearance:none;background:none;border:0;padding:6px 2px 0;margin:0;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  color:inherit;font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1);
+}
+.critter:hover{transform:translateY(-5px)}
+.critter:active{transform:translateY(-1px) scale(.98)}
+.critter:focus{outline:none}
+.critter:focus-visible{outline:3px dashed var(--c-deep);outline-offset:4px;border-radius:26px}
+.critter svg{display:block;width:var(--w);height:auto;overflow:visible}
+
+.seat{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--w:clamp(60px,19vw,168px);margin-bottom:6px}
+.seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--w:clamp(64px,20vw,176px);margin-bottom:24px}
+.seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--w:clamp(62px,19.5vw,172px);margin-bottom:10px}
+.seat[data-id="ton"]{--c:var(--ton);--c-deep:var(--ton-deep);--c-soft:var(--ton-soft);--w:clamp(96px,29vw,252px)}
+
+.body{fill:var(--c)}
+.belly{fill:var(--c-soft);opacity:.85}
+.ear-outer{fill:var(--c-deep)}
+.ear-inner{fill:var(--c-soft);opacity:.9}
+.ear-inner.dim{opacity:.5}
+.foot{fill:var(--c-deep)}
+.cheek{fill:var(--c-deep);opacity:.42}
+.shade{fill:var(--shadow)}
+.eye{fill:var(--eye)}
+.shine{fill:var(--eye-shine)}
+.mouth{fill:var(--mouth)}
+.sprig{stroke:var(--c-deep);stroke-width:4;stroke-linecap:round;fill:none}
+.berry{fill:var(--accent)}
+.moss{fill:var(--moss)}
+.brow{stroke:var(--c-deep);stroke-width:4.5;stroke-linecap:round;fill:none}
+
+.eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.4s infinite}
+.critter[data-id="tu"] .eyes{animation-delay:1.3s}
+.critter[data-id="ta"] .eyes{animation-delay:2.7s}
+.critter[data-id="ton"] .eyes{animation-delay:3.9s}
+@keyframes blink{0%,95.5%,100%{transform:scaleY(1)}97.5%{transform:scaleY(.08)}}
+
+.bob{transform-box:fill-box;transform-origin:50% 95%;animation:bob 3.6s ease-in-out infinite}
+.critter[data-id="tu"] .bob{animation-duration:4.2s;animation-delay:-.8s}
+.critter[data-id="ta"] .bob{animation-duration:3.9s;animation-delay:-1.7s}
+.critter[data-id="ton"] .bob{animation-duration:4.8s;animation-delay:-2.4s}
+@keyframes bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-4px) scale(.985,1.02)}}
+
+.critter.singing .bob{animation:sing .5s cubic-bezier(.3,1.4,.5,1)}
+@keyframes sing{
+  0%{transform:translateY(6px) scale(1.12,.86)}
+  40%{transform:translateY(-14px) scale(.92,1.13)}
+  70%{transform:translateY(-4px) scale(1.04,.97)}
+  100%{transform:translateY(0) scale(1,1)}
+}
+/* главный поёт басом — качается тяжелее и ниже */
+.critter[data-id="ton"].singing .bob{animation:rumble .78s cubic-bezier(.3,1.2,.5,1)}
+@keyframes rumble{
+  0%{transform:translateY(10px) scale(1.14,.84)}
+  30%{transform:translateY(-6px) scale(.95,1.09)}
+  55%{transform:translateY(4px) scale(1.06,.95)}
+  78%{transform:translateY(-2px) scale(.99,1.02)}
+  100%{transform:translateY(0) scale(1,1)}
+}
+.mouth{transform-box:fill-box;transform-origin:center;transition:transform .12s ease}
+.critter.singing .mouth{transform:scale(1.5,2.5)}
+.critter[data-id="ton"].singing .mouth{transform:scale(1.7,3.1)}
+/* Уши, растущие вверх, качаются от основания — ось внизу. */
+.ear{transform-box:fill-box;transform-origin:50% 90%;transition:transform .2s ease}
+.critter.singing .ear-l{transform:rotate(-11deg)}
+.critter.singing .ear-r{transform:rotate(11deg)}
+/* Висячее ухо держится за голову верхним концом: ось наверху, а при пении
+   от тела отходит нижняя часть — иначе ухо уезжает со своего места. */
+.critter[data-id="tu"] .ear{transform-origin:50% 8%}
+.critter[data-id="tu"].singing .ear-l{transform:rotate(13deg)}
+.critter[data-id="tu"].singing .ear-r{transform:rotate(-13deg)}
+
+/* подпись */
+.tag{display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25}
+.syl{
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4.4vw,27px);
+  color:var(--c-deep);letter-spacing:.03em;
+}
+.critter[data-id="ton"] .syl{font-size:clamp(22px,5.6vw,36px)}
+.name{font-weight:700;font-size:clamp(12px,3vw,13.5px)}
+.note{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(9.5px,2.5vw,10.5px);
+  color:var(--ink-soft);letter-spacing:.02em;font-variant-numeric:tabular-nums;
+}
+/* Переключатель ноты — отдельный ряд кнопок, а не часть силуэта.
+   position:relative: сдвиг ряда на общую линию делается только на вид,
+   место в колонке остаётся за ним, и поляна от этого не растёт. */
+.octaves{position:relative;display:flex;align-items:center;gap:2px;margin-top:2px}
+.octaves .cap{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-soft);margin-right:5px;
+}
+.lvl{
+  width:clamp(18px,5.5vw,26px);height:clamp(18px,5.5vw,26px);padding:0;border:0;background:none;cursor:pointer;
+  display:grid;grid-template-areas:"k";place-items:center;
+  -webkit-tap-highlight-color:transparent;
+}
+/* Кружок и цифра — в одной клетке грида, друг поверх друга: точка осталась
+   точкой, просто теперь на ней написано, какой клавишей её позвать. */
+.lvl::before,.lvl .num{grid-area:k}
+.lvl::before{
+  content:"";width:clamp(13px,4vw,19px);height:clamp(13px,4vw,19px);border-radius:50%;
+  border:1.5px solid var(--c-deep);opacity:.45;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1),opacity .15s ease,background .15s ease;
+}
+/* Узкие экраны: подпись "НОТА"/"ОКТАВА" не сжимается читаемо ни при каком
+   clamp — до этой ширины кружки и так уже сузились до предела (--w выше),
+   а слово рядом продолжало пробивать колонку насквозь. Кружки без слова
+   всё ещё понятны — они прямо под слогом и именем своего зверя. */
+@media (max-width:520px){ .octaves .cap{display:none} }
+.lvl .num{
+  /* position — не прихоть: у выбранного кружка есть transform, а значит и
+     свой слой, и без этого цифра оказывается под заливкой. */
+  position:relative;z-index:1;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;font-weight:500;
+  line-height:1;color:var(--c-deep);opacity:.8;font-variant-numeric:tabular-nums;
+  pointer-events:none;transition:color .15s ease,opacity .15s ease;
+}
+.lvl:hover::before{opacity:.85;transform:scale(1.12)}
+.lvl:hover .num{opacity:1}
+.lvl[aria-pressed="true"]::before{background:var(--c-deep);opacity:1;transform:scale(1.12)}
+.lvl[aria-pressed="true"] .num{color:var(--ground-2);opacity:1}
+.lvl:focus{outline:none}
+.lvl:focus-visible::before{outline:2px dashed var(--c-deep);outline-offset:3px;opacity:1}
+
+/* пузырь со слогом */
+.pop{
+  position:absolute;left:50%;top:4px;transform:translateX(-50%);
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(22px,6vw,30px);
+  color:var(--c-deep);pointer-events:none;white-space:nowrap;animation:pop 1.1s ease-out forwards;
+}
+@keyframes pop{
+  0%{opacity:0;transform:translate(-50%,6px) scale(.6)}
+  22%{opacity:1;transform:translate(-50%,-14px) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-86px) scale(1)}
+}
+
+/* ---------- пульт ---------- */
+.console{
+  margin-top:4px;display:grid;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:clamp(13px,3vw,22px);
+  backdrop-filter:blur(6px);
+}
+.console-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;justify-content:space-between}
+.console-title{
+  margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:500;
+}
+/* Кошелёк — состояние, а не действие: живёт в шапке панели рядом с
+   «черновиком», тем же шрифтом и тем же весом, и не спорит с кнопкой минта. */
+/* Шапка сайта. Кошелёк там, где его ищут, — справа вверху, и рядом с ним
+   переход в галерею: две вещи про весь сайт, а не про эту страницу. */
+.top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;margin:0 0 clamp(10px,3vw,22px);
+}
+.brand{
+  display:inline-flex;gap:0;text-decoration:none;
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4vw,21px);
+  letter-spacing:.01em;line-height:1;
+}
+.brand .s{display:inline-block}
+.brand .s:nth-child(1){color:var(--ti-deep)}
+.brand .s:nth-child(2){color:var(--tu-deep)}
+.brand .s:nth-child(3){color:var(--ta-deep)}
+.brand .s:nth-child(4){color:var(--ton-deep)}
+.brand:hover .s{filter:brightness(1.12)}
+.top-right{display:flex;align-items:center;gap:10px;position:relative}
+.navlink{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+  text-decoration:none;padding:7px 10px;border-radius:999px;
+}
+.navlink:hover{color:var(--ink)}
+.wallet{
+  appearance:none;font:inherit;cursor:pointer;font-weight:800;font-size:13px;
+  color:var(--accent);background:none;border:2px solid var(--accent);
+  border-radius:999px;padding:0 15px;
+  /* высота задана явно: подключённый кошелёк пишется другим шрифтом, и без
+     этого шапка на двух страницах оказывалась разной высоты */
+  height:34px;display:inline-flex;align-items:center;
+}
+.wallet:hover{background:var(--accent);color:var(--ground)}
+.wallet.on{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:500;font-size:11.5px;
+  color:var(--ink-soft);border-color:var(--line);border-width:1px;padding:0 13px;
+}
+.wallet.on:hover{color:var(--ink);background:none;border-color:var(--ink-soft)}
+.wallet:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top-right{position:relative}
+.wallet-menu{
+  position:absolute;top:calc(100% + 8px);right:0;z-index:20;min-width:190px;
+  display:flex;flex-direction:column;gap:2px;padding:8px;
+  background:var(--ground-2);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 12px 30px var(--shadow);
+}
+.wallet-menu-addr{
+  margin:0 0 4px;padding:4px 8px;color:var(--ink-soft);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
+}
+.wallet-menu a,.wallet-menu button{
+  appearance:none;border:0;background:none;font:inherit;font-size:14px;text-align:left;
+  color:var(--ink);text-decoration:none;padding:7px 8px;border-radius:9px;cursor:pointer;
+}
+.wallet-menu a:hover,.wallet-menu button:hover{background:var(--card);color:var(--accent)}
+.tape-info{
+  text-transform:none;letter-spacing:.04em;color:var(--ink);
+  border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-left:8px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.tape{
+  display:flex;gap:7px;overflow-x:auto;padding:10px 2px;min-height:54px;align-items:center;
+  border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);
+  scrollbar-width:thin;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
+}
+.chip{
+  flex:0 0 auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;font-size:14px;
+  padding:6px 12px;border-radius:12px;background:var(--cc);color:var(--chip-ink);
+  animation:drop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.chip.ghost{background:none;border:1.5px dashed var(--line);color:var(--ink-soft);animation:none}
+.chip .oct{font-size:9.5px;opacity:.75;margin-left:3px}
+.chip{transition:transform .16s cubic-bezier(.34,1.56,.64,1),box-shadow .16s ease}
+.chip.now{transform:translateY(-5px) scale(1.1);box-shadow:0 0 0 2.5px var(--ink)}
+.chip.ghost.now{background:var(--line);color:var(--ink)}
+.chip[data-id="ton"]{color:var(--ton-chip-ink)}
+/* За пределом карточки чипы тускнеют, а у первого из них — черта:
+   видно, докуда песня попадёт в NFT. Играть дальше никто не мешает. */
+.chip.past{opacity:.35}
+.chip.past:first-of-type{box-shadow:none}
+.chip.past[data-first]{position:relative}
+.tape .chip.past.edge{border-left:2px solid var(--accent);border-top-left-radius:2px;border-bottom-left-radius:2px}
+.tape-info.over{border-color:var(--accent);color:var(--accent)}
+/* Пауза: ширина = та самая длина, что уйдёт в байты песни, в шестнадцатых.
+   Не «сколько миллисекунд молчали», а «сколько от такта» — иначе полоска
+   показывала бы одно, а карточка играла другое. */
+.rest[hidden]{display:none}
+.rest{
+  flex:0 0 auto;height:14px;border-radius:7px;align-self:center;
+  background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 7px);
+  transition:background .2s ease;
+}
+.rest.now{background:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 7px)}
+.tape-label{
+  flex:0 0 auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);padding-right:2px;
+}
+@keyframes drop{from{opacity:0;transform:translateY(-10px) scale(.8)}to{opacity:1;transform:none}}
+
+.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.btn{
+  appearance:none;font:inherit;font-weight:800;cursor:pointer;
+  padding:11px 18px;border-radius:999px;border:2px solid var(--ink);
+  background:var(--accent);color:#FFF8FA;
+  box-shadow:0 3px 0 var(--ink);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--ink)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:0 3px 0 var(--line);border-color:var(--line)}
+.btn.ghost:hover{box-shadow:0 5px 0 var(--line)}
+.btn.live{border-color:var(--accent);color:var(--accent);box-shadow:0 3px 0 var(--accent)}
+.btn.live:hover{box-shadow:0 5px 0 var(--accent)}
+.btn:focus-visible{outline:3px dashed var(--accent);outline-offset:3px}
+
+/* ---------- карточка песни (прототип NFT) ---------- */
+.mintbox{
+  margin-top:16px;display:grid;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:22px;
+  padding:clamp(13px,3vw,22px);backdrop-filter:blur(6px);
+}
+.mint-grid{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px;align-items:start}
+/* Благодарность за минт: единственное место, где страница говорит от имени
+   пушистиков. Появляется только после подтверждённой карточки. */
+.thanks{
+  margin:12px 0 0;padding:14px 16px;border-radius:16px;
+  background:var(--ground);border:1px solid var(--line);text-align:center;
+  animation:thanksIn .5s ease-out both;
+}
+.thanks-word{
+  margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;
+  font-size:clamp(20px,5vw,26px);color:var(--accent);letter-spacing:.04em;
+}
+.thanks-said{margin:4px 0 6px;font-size:13px;color:var(--ink-soft)}
+.thanks a{color:var(--accent)}
+@keyframes thanksIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .thanks{animation:none} }
+.card-hold{border-radius:16px;overflow:hidden;box-shadow:0 10px 28px var(--shadow);line-height:0}
+.card-hold svg{width:100%;height:auto;display:block}
+.specs{
+  margin:0 0 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;font-variant-numeric:tabular-nums;
+}
+.specs dt{color:var(--ink-soft);white-space:nowrap}
+.specs dd{margin:0;overflow-wrap:anywhere}
+.specs dd b{color:var(--accent);font-weight:700}
+.meta{
+  margin:12px 0 0;max-height:260px;overflow:auto;
+  background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:12px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;line-height:1.5;
+  white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);
+}
+@media (max-width:700px){ .mint-grid{grid-template-columns:1fr} }
+
+/* Предпросмотр «как на Getgems»: то же имя, описание и трейты, что уедут
+   в get_nft_content, только не JSON-строкой, а плитками — примерно как их
+   разложит сама витрина маркетплейса. */
+.gg-preview{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.gg-eyebrow{
+  margin:0 0 10px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+}
+.gg-name{margin:0 0 6px;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:19px}
+.gg-desc{margin:0 0 14px;max-width:64ch;color:var(--ink-soft);font-size:14px;line-height:1.5}
+.gg-traits{display:flex;flex-wrap:wrap;gap:8px}
+.gg-trait{
+  display:flex;flex-direction:column;gap:2px;min-width:84px;padding:7px 12px;
+  background:var(--ground);border:1px solid var(--line);border-radius:10px;
+}
+.gg-trait-type{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
+}
+.gg-trait-value{font-weight:800;font-size:13.5px}
+.gg-trait.rare{background:color-mix(in srgb, var(--accent) 14%, var(--ground));border-color:var(--accent)}
+.gg-trait.rare .gg-trait-type{color:var(--accent)}
+.gg-trait.rare .gg-trait-value{color:var(--accent)}
+
+/* ---------- карточки ---------- */
+.dossier{margin-top:24px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.card{
+  display:flex;flex-direction:column;gap:5px;padding:14px 16px;border-radius:16px;
+  background:var(--card);border:1px solid var(--line);border-left:5px solid var(--cc);
+}
+.card h3{margin:0;font-family:"Podkova",Georgia,serif;font-size:19px;font-weight:700}
+.card p{margin:0;font-size:14px;color:var(--ink-soft)}
+.card dl{
+  margin:4px 0 0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;
+}
+.card dt{color:var(--ink-soft)}
+.card dd{margin:0}
+.card dd.plain{font-family:"Nunito",sans-serif}
+
+.footnote{margin:22px 0 0;text-align:center;font-size:13px;color:var(--ink-soft)}
+kbd{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;color:var(--ink);
+}
+
+
+/* Четверо всегда в один ряд, как на кочке и должно быть: посадка на
+   выпуклый край (скрипт ниже, groundTop/shadow) меряет мировые координаты
+   и одну и ту же кривую кочки для всех — с раскладкой в несколько строк
+   (было тут раньше) тень каждого следующего ряда съезжала на кочку первого
+   ряда через огромный отрицательный margin-bottom. Поэтому на узких
+   экранах звери просто мельче (см. --w выше), а не перестраиваются. */
+@media (max-width:700px){
+  .tally{margin-left:0;width:100%}
+  .btn{flex:1 1 auto;text-align:center}
+}
+@media (max-width:380px){
+  .console-head{flex-direction:column;align-items:flex-start}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bob,.eyes{animation:none !important}
+  .critter.singing .bob,.critter[data-id="ton"].singing .bob{animation:none}
+  .critter.singing{transform:translateY(-6px)}
+  .pop{animation:popq .8s ease-out forwards}
+  @keyframes popq{0%{opacity:0}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-30px)}}
+  .btn,.critter{transition:none}
+}
+</style>
+
+<div class="page">
+  <nav class="top">
+    <a class="brand" href="./"><span class="s">Ти</span><span class="s">ту</span><span class="s">та</span><span class="s">тон</span></a>
+    <div class="top-right">
+      <a class="navlink" href="gallery.html">Галерея</a>
+      <button class="wallet" id="walletBtn" type="button">Подключить кошелёк</button>
+    </div>
+  </nav>
+
+  <header class="banner">
+    <p class="eyebrow">Семь нот на четверых</p>
+    <h1>Пушистые мохоседы</h1>
+    <p class="lede">Четверо живут на моховой кочке и делят гамму по-честному: каждому свой слог и свои ноты. Ткните любого — споёт. Ткните всех подряд, слева направо, — получится их имя, и над кочкой взойдёт светило. Лента внизу запомнит и слоги, и ваш темп с паузами, а потом отыграет всё обратно.</p>
+  </header>
+
+  <div class="glade" id="glade">
+    <div class="mound" id="mound" aria-hidden="true"></div>
+  </div>
+
+  <section class="console">
+    <div class="console-head">
+      <h2 class="console-title">Лента распева <span class="tape-info" id="tapeInfo">пример · 140 уд/мин</span></h2>
+    </div>
+    <div class="tape" id="tape" aria-live="polite" aria-label="Спетые слоги"></div>
+    <div class="controls">
+      <button class="btn" id="play" type="button">Проиграть ленту</button>
+      <button class="btn ghost" id="mute" type="button" aria-pressed="false">Звук: включён</button>
+      <button class="btn ghost" id="clear" type="button">Очистить ленту</button>
+    </div>
+  </section>
+
+  <section class="mintbox">
+    <div class="console-head">
+      <h2 class="console-title">Карточка песни <span class="tape-info" id="cardState">черновик</span></h2>
+      <span class="console-title">SVG целиком на чейне</span>
+    </div>
+    <div class="mint-grid">
+      <div class="card-hold" id="cardHold"></div>
+      <div class="mint-side">
+        <dl class="specs" id="specs"></dl>
+        <div class="controls">
+          <button class="btn" id="mintBtn" type="button">Отчеканить</button>
+          <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Проиграть карточку</button>
+          <button class="btn ghost" id="metaBtn" type="button" aria-expanded="false">Показать метаданные</button>
+        </div>
+        <p class="note" id="mintNote">Чеканит контракт, а не мы: единственная трата на всём сайте.</p>
+        <div class="thanks" id="thanks" hidden>
+          <p class="thanks-word">спасибо!</p>
+          <p class="thanks-said">Пушистики кланяются и убегают петь дальше.</p>
+          <p class="note" id="thanksLinks"></p>
+        </div>
+        <pre class="meta" id="metaOut" hidden></pre>
+      </div>
+    </div>
+
+    <div class="gg-preview">
+      <p class="gg-eyebrow">Так это увидят на Getgems</p>
+      <div id="ggOut"></div>
+    </div>
+  </section>
+
+  <div class="dossier" id="dossier"></div>
+
+  <p class="footnote">Клавиши <kbd>1</kbd>–<kbd>9</kbd> — это ноты, все девять: цифра написана прямо на точке. У малышей по две ноты, у Тонтона одна до в трёх октавах — вместе вся гамма. <kbd>0</kbd> проигрывает ленту. Точки — тоже инструмент: выбирают ноту и сразу поют, попадая в ленту. Быстрее, чем лента умеет запоминать, сыграть не выйдет: торопливые нажатия становятся перебором — ровно тем, что потом прозвучит с карточки. Чем ниже поёт квартет, тем темнее небо на карточке.</p>
+</div>
+
+<script src="settings.js"></script>
+<script src="wallet.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------- жители ---------------- */
+/* Гамма поделена между четырьмя без остатка и без перекрытий: каждая нота
+   принадлежит ровно одному существу, а квартет в порядке ТИ-ТУ-ТА-ТОН
+   спускается по ней сверху вниз. Приятное совпадение: в сольфеджио «ти» —
+   это и есть си, так что Тинька поёт собственную ноту.
+   Поле rank — ступень гаммы, 0 = до, 6 = си. По нему считаются и высота
+   столбика в партитуре, и то, день на карточке или ночь. */
+var CAST = [
+  { id:"ti", syl:"ТИ", name:"Тинька", species:"мохосед-росток",
+    about:"Самая мелкая и самая звонкая, держит две верхние ступени. Носит на макушке росток с ягодой и поёт на вдохе, поэтому вечно торопится.",
+    notes:[{n:"си₅",f:987.77,rank:6},{n:"ля₅",f:880.00,rank:5}],
+    pick:"нота",
+    formants:[270,2290,3010], dur:.5, ears:"tall", seed:11,
+    habit:"вступает первой, не дожидаясь остальных" },
+  { id:"tu", syl:"ТУ", name:"Тумба", species:"мохосед ушастый",
+    about:"Круглый, тёплый, уши висят поверх боков до самой земли. Тянет ноту дольше всех и слегка гудит, как чайник на дальней конфорке.",
+    notes:[{n:"соль₅",f:783.99,rank:4},{n:"фа₅",f:698.46,rank:3}],
+    pick:"нота",
+    formants:[300,870,2240], dur:.58, ears:"droop", seed:23,
+    habit:"перед нотой делает два вдоха" },
+  { id:"ta", syl:"ТА", name:"Таша", species:"мохосед вихрастый",
+    about:"Самая открытая гласная в квартете и самый растрёпанный вихор. Ей достались две средние ступени — те, что делят гамму пополам.",
+    notes:[{n:"ми₅",f:659.25,rank:2},{n:"ре₅",f:587.33,rank:1}],
+    pick:"нота",
+    formants:[700,1220,2600], dur:.54, ears:"tuft", seed:37,
+    habit:"после ноты обязательно подпрыгивает" },
+  { id:"ton", syl:"ТОН", name:"Тонтон", species:"мохосед-старейшина",
+    about:"Главный. Тёмный, тяжёлый, на макушке настоящий мох — так стар, что оброс. Нота у него одна на всех — до, та самая, на которую садится вся фраза. Точками выбирается октава; обычно сидит на нижней, до₃. Чем ниже он забирается, тем темнее небо на карточке.",
+    notes:[{n:"до₅",f:523.25,rank:0},{n:"до₄",f:261.63,rank:0},{n:"до₃",f:130.81,rank:0}],
+    start:2, pick:"октава",
+    formants:[500,900,2400], dur:.9, ears:"round", seed:53,
+    habit:"вступает последним и закрывает песню" }
+];
+/* ORDER и plural живут ниже, внутри блока TTN:BEGIN — он извлекается тестом
+   паритета как единый самодостаточный кусок, и копии кода заводить нельзя. */
+
+/* ---------------- рисование ---------------- */
+function rng(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function fluff(cx,cy,rx,ry,n,amp,seed){
+  var r = rng(seed), pts = [], i, a;
+  for(i=0;i<n;i++){
+    a = (i/n)*Math.PI*2 - Math.PI/2;
+    var j = .94 + r()*.12;
+    pts.push([cx + Math.cos(a)*rx*j, cy + Math.sin(a)*ry*j]);
+  }
+  var d = "M " + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+  for(i=0;i<n;i++){
+    var p = pts[(i+1)%n];
+    a = ((i+.5)/n)*Math.PI*2 - Math.PI/2;
+    var k = 1 + amp*(.65 + r()*.7);
+    d += " Q " + (cx + Math.cos(a)*rx*k).toFixed(1) + " " + (cy + Math.sin(a)*ry*k).toFixed(1) +
+         " " + p[0].toFixed(1) + " " + p[1].toFixed(1);
+  }
+  return d + " Z";
+}
+
+/* Ухо: внешний <g> шевелится через CSS, внутренний держит статичный наклон.
+   Разделение важно — transform-origin на внешнем слое сбивал бы центр поворота атрибута. */
+function ear(side, tilt, pivot, shapes){
+  return '<g class="ear ear-' + side + '"><g transform="rotate(' + tilt + ' ' + pivot[0] + ' ' + pivot[1] + ')">' +
+    shapes + '</g></g>';
+}
+
+function ears(s){
+  var g = "";
+  if(s.ears === "tall"){
+    g += ear("l", -13, [76,98],
+      '<path class="ear-outer" d="' + fluff(76,58,14,38,11,.07,s.seed+1) + '"/>' +
+      '<ellipse class="ear-inner" cx="76" cy="58" rx="6" ry="22"/>');
+    g += ear("r", 13, [124,98],
+      '<path class="ear-outer" d="' + fluff(124,58,14,38,11,.07,s.seed+2) + '"/>' +
+      '<ellipse class="ear-inner" cx="124" cy="58" rx="6" ry="22"/>');
+  } else if(s.ears === "droop"){
+    /* Вислые уши рисуются поверх тела — иначе видно только краешек. Но они не должны
+       спорить с мордочкой: уже, тише внутри и отодвинуты от щёк (щека начинается на x=58). */
+    /* ось — у крепления к голове, наклон уводит нижний конец наружу */
+    g += ear("l", 8, [44,90],
+      '<path class="ear-outer" d="' + fluff(42,116,14,29,11,.09,s.seed+1) + '"/>' +
+      '<ellipse class="ear-inner dim" cx="43" cy="118" rx="5" ry="15"/>');
+    g += ear("r", -8, [156,90],
+      '<path class="ear-outer" d="' + fluff(158,116,14,29,11,.09,s.seed+2) + '"/>' +
+      '<ellipse class="ear-inner dim" cx="157" cy="118" rx="5" ry="15"/>');
+  } else if(s.ears === "tuft"){
+    g += ear("l", -10, [72,100],
+      '<path class="ear-outer" d="' + fluff(68,64,22,25,10,.18,s.seed+1) + '"/>' +
+      '<ellipse class="ear-inner" cx="69" cy="66" rx="9" ry="11"/>');
+    g += ear("r", 10, [128,100],
+      '<path class="ear-outer" d="' + fluff(132,64,22,25,10,.18,s.seed+2) + '"/>' +
+      '<ellipse class="ear-inner" cx="131" cy="66" rx="9" ry="11"/>');
+  } else {
+    g += ear("l", 0, [66,104],
+      '<path class="ear-outer" d="' + fluff(58,74,26,26,12,.11,s.seed+1) + '"/>' +
+      '<ellipse class="ear-inner" cx="59" cy="76" rx="12" ry="12"/>');
+    g += ear("r", 0, [134,104],
+      '<path class="ear-outer" d="' + fluff(142,74,26,26,12,.11,s.seed+2) + '"/>' +
+      '<ellipse class="ear-inner" cx="141" cy="76" rx="12" ry="12"/>');
+  }
+  return g;
+}
+
+function crown(s){
+  if(s.ears === "tall")
+    return '<path class="sprig" d="M100 62 C 99 48 101 42 100 34"/>' +
+           '<path class="sprig" d="M100 44 C 108 40 112 42 114 38"/>' +
+           '<circle class="berry" cx="100" cy="30" r="6"/>';
+  if(s.ears === "tuft")
+    return '<path class="sprig" d="M90 60 C 95 44 105 44 110 56"/>';
+  if(s.ears === "round") /* старейшина так стар, что на нём вырос мох */
+    return '<circle class="moss" cx="84" cy="48" r="9"/>' +
+           '<circle class="moss" cx="100" cy="40" r="11"/>' +
+           '<circle class="moss" cx="116" cy="48" r="9"/>' +
+           '<circle class="moss" cx="72" cy="58" r="5"/>' +
+           '<circle class="moss" cx="128" cy="58" r="5"/>';
+  return '<circle class="cheek" cx="86" cy="94" r="2.6"/><circle class="cheek" cx="114" cy="94" r="2.6"/>';
+}
+
+function svg(s){
+  var brows = s.ears === "round"
+    ? '<path class="brow" d="M68 92 C 74 87 82 87 88 91"/><path class="brow" d="M132 92 C 126 87 118 87 112 91"/>'
+    : '';
+  var front = s.ears === "droop";
+  return '<svg viewBox="0 0 200 200" aria-hidden="true" focusable="false">' +
+    '<ellipse class="shade" cx="100" cy="184" rx="54" ry="9"/>' +
+    '<g class="bob">' +
+      (front ? "" : ears(s)) +
+      '<path class="foot" d="' + fluff(76,168,17,12,9,.1,s.seed+3) + '"/>' +
+      '<path class="foot" d="' + fluff(124,168,17,12,9,.1,s.seed+4) + '"/>' +
+      '<path class="body" d="' + fluff(100,118,64,56,17,.085,s.seed) + '"/>' +
+      crown(s) +
+      '<path class="belly" d="' + fluff(100,140,36,28,13,.07,s.seed+5) + '"/>' +
+      (front ? ears(s) : "") +
+      '<ellipse class="cheek" cx="70" cy="126" rx="12" ry="8"/>' +
+      '<ellipse class="cheek" cx="130" cy="126" rx="12" ry="8"/>' +
+      brows +
+      '<g class="eyes">' +
+        '<circle class="eye" cx="81" cy="110" r="9"/><circle class="shine" cx="84" cy="106.5" r="3.2"/>' +
+        '<circle class="eye" cx="119" cy="110" r="9"/><circle class="shine" cx="122" cy="106.5" r="3.2"/>' +
+      '</g>' +
+      '<ellipse class="mouth" cx="100" cy="134" rx="7" ry="5"/>' +
+    '</g></svg>';
+}
+
+/* ---------------- голос ---------------- */
+var ctx = null, master = null, muted = false;
+
+function audio(){
+  if(!ctx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = muted ? 0 : .26;
+    var comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.ratio.value = 5;
+    master.connect(comp); comp.connect(ctx.destination);
+  }
+  if(ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+
+function voice(s, at, pitch, level){
+  var c = audio();
+  if(!c || muted) return;
+  var t = c.currentTime + at;
+  var f = pitch || s.notes[0].f;
+  var lv = (level == null ? 1 : level);
+  var dur = s.dur;
+  var low = f < 160;
+
+  var out = c.createGain();
+  out.gain.setValueAtTime(.0001, t);
+  out.gain.exponentialRampToValueAtTime(lv, t + (low ? .07 : .05));
+  out.gain.setValueAtTime(lv, t + dur*.6);
+  out.gain.exponentialRampToValueAtTime(.0001, t + dur + .14);
+  out.connect(master);
+
+  /* согласная «Т» — короткий шумовой щелчок */
+  var len = Math.floor(c.sampleRate * .045);
+  var buf = c.createBuffer(1, len, c.sampleRate), ch = buf.getChannelData(0);
+  for(var i=0;i<len;i++) ch[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 3.2);
+  var ns = c.createBufferSource(); ns.buffer = buf;
+  var nf = c.createBiquadFilter(); nf.type = "bandpass";
+  nf.frequency.value = low ? 1500 : 2800; nf.Q.value = 1.1;
+  var ng = c.createGain(); ng.gain.value = .5 * lv;
+  ns.connect(nf); nf.connect(ng); ng.connect(master);
+  ns.start(t);
+
+  /* гласная: форманты поверх пилы */
+  var mix = c.createGain(); mix.gain.value = .42;
+  var o1 = c.createOscillator(), o2 = c.createOscillator(), o3 = c.createOscillator();
+  o1.type = "sawtooth"; o2.type = "sawtooth"; o3.type = "triangle";
+  o2.detune.value = 7;
+  o3.frequency.value = f * 2;
+  o1.frequency.setValueAtTime(f*.93, t); o1.frequency.exponentialRampToValueAtTime(f, t + .11);
+  o2.frequency.setValueAtTime(f*.93, t); o2.frequency.exponentialRampToValueAtTime(f, t + .13);
+  var og = c.createGain(); og.gain.value = low ? .5 : .3;
+  o3.connect(og); og.connect(mix);
+  o1.connect(mix); o2.connect(mix);
+
+  var vib = c.createOscillator(), vg = c.createGain();
+  vib.frequency.value = low ? 4.2 : 5.3;
+  vg.gain.value = f * (low ? .008 : .014);
+  vib.connect(vg); vg.connect(o1.frequency); vg.connect(o2.frequency);
+
+  var amps = [1, .45, .17], qs = [9, 11, 13];
+  for(var k=0;k<s.formants.length;k++){
+    var bp = c.createBiquadFilter(); bp.type = "bandpass";
+    bp.frequency.value = s.formants[k]; bp.Q.value = qs[k];
+    var g = c.createGain(); g.gain.value = amps[k];
+    mix.connect(bp); bp.connect(g); g.connect(out);
+  }
+  /* тёплый корпус голоса — у баса его больше */
+  var lp = c.createBiquadFilter(); lp.type = "lowpass";
+  lp.frequency.value = Math.max(320, f * 3);
+  var lg = c.createGain(); lg.gain.value = low ? .42 : .2;
+  mix.connect(lp); lp.connect(lg); lg.connect(out);
+
+  [o1,o2,o3,vib].forEach(function(o){ o.start(t); o.stop(t + dur + .25); });
+}
+
+/* ---------------- сцена ---------------- */
+var glade = document.getElementById("glade");
+var tape = document.getElementById("tape");
+var tapeInfo = document.getElementById("tapeInfo");
+var nodes = {}, tapeSeeded = true;
+var level = {};          /* текущая ступень тональности у каждого */
+var seq = [];            /* лента: кто и на какой ноте спел */
+var timers = [], playing = false;
+
+/* Клавиатура. У каждой ноты своя цифра, по порядку слева направо и сверху
+   вниз по гамме: 1 — си Тиньки, 9 — нижнее до Тонтона, ноль отдан ленте.
+   Список строится из CAST, а не набирается руками: появится новая нота —
+   сама получит следующую цифру, а если нот станет больше девяти, лишние
+   просто останутся без клавиши, и ничего не сломается. */
+var KEYS = [];
+CAST.forEach(function(s){
+  s.notes.forEach(function(n, i){ KEYS.push({ s:s, i:i }); });
+});
+function keyOf(s, i){
+  for(var k=0;k<KEYS.length && k<9;k++) if(KEYS[k].s === s && KEYS[k].i === i) return k + 1;
+  return 0;
+}
+
+CAST.forEach(function(s){
+  level[s.id] = s.start || 0;
+  var at = level[s.id];
+
+  var seat = document.createElement("div");
+  seat.className = "seat";
+  seat.setAttribute("data-id", s.id);
+
+  var b = document.createElement("button");
+  b.className = "critter";
+  b.type = "button";
+  b.setAttribute("data-id", s.id);
+  b.setAttribute("aria-label", s.name + " поёт слог " + s.syl);
+  b.innerHTML =
+    svg(s) +
+    '<span class="tag">' +
+      '<span class="syl">' + s.syl + '</span>' +
+      '<span class="name">' + s.name + '</span>' +
+      '<span class="note" data-note>' + s.notes[at].n + ' · ' + s.notes[at].f.toFixed(1) + ' Гц</span>' +
+    '</span>';
+  b.addEventListener("click", function(){ strike(s, null); });
+  seat.appendChild(b);
+
+  /* октава — отдельный переключатель: клик по существу её не трогает */
+  if(s.notes.length > 1){
+    var sw = document.createElement("div");
+    sw.className = "octaves";
+    sw.setAttribute("role", "group");
+    sw.setAttribute("aria-label", s.name + ", " + (s.pick || "нота"));
+    sw.innerHTML = '<span class="cap">' + (s.pick || 'нота') + '</span>';
+    s.notes.forEach(function(n, i){
+      var num = keyOf(s, i);
+      var d = document.createElement("button");
+      d.className = "lvl";
+      d.type = "button";
+      d.setAttribute("data-i", i);
+      d.setAttribute("aria-label", n.n + ", " + n.f.toFixed(1) + " Гц" +
+        (num ? ", клавиша " + num : ""));
+      d.setAttribute("aria-pressed", i === at ? "true" : "false");
+      d.innerHTML = '<span class="num" aria-hidden="true">' + (num || "") + '</span>';
+      d.addEventListener("click", function(){ strike(s, i); });
+      sw.appendChild(d);
+    });
+    seat.appendChild(sw);
+  }
+
+  glade.appendChild(seat);
+  nodes[s.id] = b;
+});
+
+/* карточки-описания */
+var dossier = document.getElementById("dossier");
+CAST.forEach(function(s){
+  var span = s.notes.length > 1
+    ? s.notes.map(function(n){ return n.n; }).join(" · ")
+    : s.notes[0].n;
+  var c = document.createElement("article");
+  c.className = "card";
+  c.style.setProperty("--cc", "var(--" + s.id + ")");
+  c.innerHTML =
+    '<h3>' + s.name + '</h3>' +
+    '<p>' + s.about + '</p>' +
+    '<dl>' +
+      '<dt>слог</dt><dd>' + s.syl + '</dd>' +
+      '<dt>тон</dt><dd>' + span + '</dd>' +
+      '<dt>ступени</dt><dd>' + s.notes.map(function(n){ return n.n; }).join(' · ') + '</dd>' +
+      '<dt>форманты</dt><dd>' + s.formants[0] + ' / ' + s.formants[1] + ' Гц</dd>' +
+      '<dt>вид</dt><dd class="plain">' + s.species + '</dd>' +
+      '<dt>привычка</dt><dd class="plain">' + s.habit + '</dd>' +
+    '</dl>';
+  dossier.appendChild(c);
+});
+
+/* лента открывается с примером */
+function seedTape(){
+  tape.innerHTML = '<span class="tape-label">пример</span>';
+  CAST.forEach(function(s){
+    var g = document.createElement("span");
+    g.className = "chip ghost";
+    g.textContent = s.syl;
+    tape.appendChild(g);
+  });
+  tapeSeeded = true;
+  seq = [];
+  lastAt = 0;
+  if(typeof updateInfo === "function") updateInfo();
+}
+
+/* Лента пишет не только слоги, но и тишину между ними. Пределов на всю
+   ленту три, и каждый со своей причиной.
+
+   MIN_GAP — не круглое число на глаз, а шестнадцатая на самом быстром
+   темпе, который песня умеет хранить: потолок в tempoOf 200 уд/мин,
+   60000 / 200 / 4 = 75 мс. Короче этого пауза в байты не влезет, поэтому
+   лента её не пишет — а вход, strike, не даёт её и сыграть.
+
+   MAX_GAP — потолок сырой паузы, 3 секунды, а не полторы, как было. От
+   мёртвой тишины при проигрывании защищают не миллисекунды, а потолок
+   q = 15: пауза не может быть длиннее 15/16 такта. А вот полторы секунды
+   означали, что медленнее 86 ударов в минуту пауза не дотягивает до 8/16
+   и НЕ ЗАСЧИТЫВАЕТСЯ ВООБЩЕ — у спокойного игрока признак «пауз» всегда
+   оставался нулём, и звёзд на карточке всегда был минимум.
+
+   TAPE_MAX — только чтобы DOM не рос бесконечно: песня целиком остаётся
+   в ленте и прокручивается.
+
+   А что именно считать паузой, здесь не решается вовсе: это REST_Q из
+   эталонного блока, полутакт, и то же самое спросит контракт. */
+var MIN_GAP = 75, MAX_GAP = 3000, TAPE_MAX = 240;
+var lastAt = 0;
+
+/* Лента не считает темп и паузы по-своему: она зовёт tempoOf и quantize —
+   те же, которыми песня превращается в байты, — и по тем же слогам, что
+   уйдут в карточку. Поэтому число в ленте, число на карточке и признак
+   «Пауз» в метаданных — всегда одно и то же число.
+   Паузу видно там же, где её увидит контракт: с полутакта, а не с круглых
+   «четырёхсот с чем-то миллисекунд». Пока темп плавает, полоски тишины
+   появляются и исчезают — это честно: темп в песне тоже ещё не устоялся. */
+function updateInfo(){
+  if(!seq.length){ tapeInfo.textContent = "пример · 140 уд/мин"; return; }
+
+  var n = Math.min(seq.length, MINT_LIMIT), i, gaps = [];
+  for(i=1;i<n;i++) gaps.push(seq[i].gap);
+  var bpm = tempoOf(gaps);
+  var rests = showRests(sixOf(bpm), n);
+
+  var txt = seq.length + " " + plural(seq.length, "слог", "слога", "слогов") +
+            " · " + bpm + " уд/мин";
+  if(n > 1) txt += " · " + rests + " " + plural(rests, "пауза", "паузы", "пауз");
+  if(seq.length > MINT_LIMIT) txt += " · в карточку войдут первые " + MINT_LIMIT;
+  tapeInfo.textContent = txt;
+  tapeInfo.classList.toggle("over", seq.length > MINT_LIMIT);
+
+  /* Черта в ленте показывает, где кончается карточка. Играть дальше никто
+     не мешает, но человек видит границу, а не упирается в неё молча. */
+  for(var k=0;k<seq.length;k++){
+    seq[k].el.classList.toggle("past", k >= MINT_LIMIT);
+    seq[k].el.classList.toggle("edge", k === MINT_LIMIT);
+  }
+}
+
+/* Полоски тишины по мерке шестнадцатой: пауза видна ровно там, где её
+   увидит контракт, — с REST_Q, полутакта. Мерку передают снаружи, потому
+   что она разная: у наигранной ленты темп считается из её же пауз, а у
+   чужой песни, пришедшей по ссылке, он записан в байтах — и пересчитывать
+   его заново значило бы показать не те паузы, что у карточки в трейте. */
+function showRests(six, upto){
+  var rests = 0;
+  for(var i=1;i<seq.length;i++){
+    var q = quantize(seq[i].gap, six), heard = q >= REST_Q;
+    if(heard && i < upto) rests++;
+    var r = seq[i].rest;
+    if(r){
+      r.hidden = !heard;
+      r.style.width = Math.min(52, q * 4) + "px";
+    }
+  }
+  return rests;
+}
+
+function addChip(s, note){
+  var now = Date.now();
+  if(tapeSeeded){ tape.innerHTML = ""; tapeSeeded = false; lastAt = 0; }
+  var gap = lastAt ? Math.min(MAX_GAP, Math.max(MIN_GAP, now - lastAt)) : 0;
+  lastAt = now;
+  pushChip(s, note, gap);
+}
+
+/* То же самое, но паузу задают снаружи: так лента набирается из готовой
+   песни — из карточки, пришедшей по ссылке, — а не по часам. */
+function pushChip(s, note, gap){
+  if(tapeSeeded){ tape.innerHTML = ""; tapeSeeded = false; lastAt = 0; }
+
+  /* Полоска тишины заводится всегда, а показать её или нет — решит
+     updateInfo, когда посчитает темп: пауза это или спешка, видно только
+     относительно темпа самой песни. */
+  var rest = null;
+  if(gap > 0){
+    rest = document.createElement("span");
+    rest.className = "rest";
+    rest.hidden = true;
+    rest.setAttribute("aria-hidden", "true");
+    tape.appendChild(rest);
+  }
+
+  var chip = document.createElement("span");
+  chip.className = "chip";
+  chip.setAttribute("data-id", s.id);
+  chip.style.setProperty("--cc", "var(--" + s.id + ")");
+  chip.textContent = s.syl;
+  if(s.notes.length > 1){
+    var o = document.createElement("span");
+    o.className = "oct";
+    o.textContent = note.n;
+    chip.appendChild(o);
+  }
+  tape.appendChild(chip);
+
+  seq.push({ s:s, note:note, gap:gap, el:chip, rest:rest });
+  while(seq.length > TAPE_MAX){
+    var old = seq.shift();
+    if(old.rest && old.rest.parentNode) tape.removeChild(old.rest);
+    if(old.el.parentNode) tape.removeChild(old.el);
+  }
+  tape.scrollLeft = tape.scrollWidth;
+  updateInfo();
+  schedulePreview();
+}
+
+seedTape();
+
+function pop(s){
+  var b = nodes[s.id], el = document.createElement("span");
+  el.className = "pop";
+  el.textContent = s.syl;
+  b.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 1150);
+}
+
+function animate(s){
+  var b = nodes[s.id];
+  b.classList.remove("singing");
+  void b.offsetWidth;
+  b.classList.add("singing");
+  setTimeout(function(){ b.classList.remove("singing"); }, s.dur*1000 + 140);
+}
+
+/* У каждого свои ступени гаммы, и они не пересекаются.
+   Меняется только октава Тонтона, и только через переключатель. */
+function noteOf(s){ return s.notes[level[s.id]]; }
+/* В финале каждый держит СВОЮ текущую ноту. Отдельного «аккордного»
+   варианта больше не нужно: до-ми-соль-си это до-мажор с септимой, а любая
+   замена на соседнюю ступень даёт его же с надстройкой — всё созвучно. */
+function chordF(s){ return noteOf(s).f; }
+
+/* Смена ноты — это тоже пение: точка звучит, попадает в ленту и считается
+   наравне с самим существом. Значит по мелким точкам можно набрать мелодию,
+   не трогая зверят, и переключение перестаёт быть «настройкой перед игрой». */
+function setOctave(s, i){
+  level[s.id] = i;
+  var seat = nodes[s.id].parentNode;
+  var note = s.notes[i];
+  nodes[s.id].querySelector("[data-note]").textContent = note.n + " · " + note.f.toFixed(1) + " Гц";
+  var dots = seat.querySelectorAll(".lvl");
+  for(var k=0;k<dots.length;k++) dots[k].setAttribute("aria-pressed", k === i ? "true" : "false");
+  perform(s, true);
+}
+
+/* Единственный вход для «человек сыграл ноту» — и клавишей, и мышью.
+
+   Лента помнит паузу между слогами, но короче MIN_GAP записать её нельзя:
+   пальцами сыграть быстрее можно, а воспроизвести уже нет — с ленты и с
+   карточки песня звучала бы не так, как её играли. Поэтому спешка не
+   пропадает и не врёт: нажатие встаёт в очередь на ближайший момент, до
+   которого лента дотягивается. Аккорд из-под пальцев выходит быстрым
+   перебором — ровно тем, что потом и прозвучит. */
+var QUEUE_MAX = 3;           /* длиннее квартета очередь не нужна */
+var nextFree = 0, queue = [];
+
+function strike(s, i){
+  var now = Date.now();
+  if(now >= nextFree){ nextFree = now + MIN_GAP; hit(s, i); return; }
+  if(queue.length >= QUEUE_MAX) return;   /* зажатая клавиша не копит хвост */
+  var wait = nextFree - now;
+  nextFree += MIN_GAP;
+  var id = setTimeout(function(){
+    var k = queue.indexOf(id); if(k >= 0) queue.splice(k, 1);
+    hit(s, i);
+  }, wait);
+  queue.push(id);
+}
+
+function dropQueue(){
+  for(var i=0;i<queue.length;i++) clearTimeout(queue[i]);
+  queue = [];
+  nextFree = 0;
+}
+
+/* i === null значит «своей нотой, какая выбрана» — так поёт сам зверь. */
+function hit(s, i){
+  if(i === null) perform(s, true); else setOctave(s, i);
+}
+
+function perform(s, counts){
+  if(counts) stopPlay();
+  var note = noteOf(s);
+  voice(s, 0, note.f);
+  if(s.id === "ton") voice(s, .03, note.f*1.5, .38); /* квинта сверху — чтобы бас читался */
+  animate(s); pop(s);
+  if(counts) addChip(s, note);
+}
+
+/* ---------------- проигрывание ленты ---------------- */
+var BEAT = .428; /* 140 уд/мин */
+var playBtn = document.getElementById("play");
+
+function clearNow(){
+  var n = tape.querySelectorAll(".now");
+  for(var i=0;i<n.length;i++) n[i].classList.remove("now");
+}
+
+function stopPlay(){
+  if(!playing && !timers.length) return;
+  playing = false;
+  for(var i=0;i<timers.length;i++) clearTimeout(timers[i]);
+  timers = [];
+  clearNow();
+  playBtn.textContent = "Проиграть ленту";
+  playBtn.classList.remove("live");
+  var cp = document.getElementById("cardPlayBtn");
+  if(cp){ cp.textContent = "Проиграть карточку"; cp.classList.remove("live"); }
+}
+
+/* Лента помнит три вещи: слог, ступень, на которой Тонтон пел в тот раз,
+   и паузу перед ним — поэтому играет вашим темпом, а не по метроному. */
+function playTape(){
+  if(playing){ stopPlay(); return; }
+  dropQueue();
+  audio();
+
+  var items = [], i, t = 0;
+  if(seq.length){
+    for(i=0;i<seq.length;i++){
+      t += (i ? seq[i].gap : 0);
+      items.push({ s:seq[i].s, note:seq[i].note, chip:seq[i].el, rest:seq[i].rest, gap:seq[i].gap, t:t });
+    }
+  } else {
+    var ghosts = tape.querySelectorAll(".chip");
+    for(i=0;i<CAST.length;i++){
+      t = i * BEAT * 1000;
+      items.push({ s:CAST[i], note:CAST[i].notes[level[CAST[i].id]], chip:ghosts[i], rest:null, gap:BEAT*1000, t:t });
+    }
+  }
+  if(!items.length) return;
+
+  playing = true;
+  playBtn.textContent = "Стоп";
+  playBtn.classList.add("live");
+
+  items.forEach(function(it){
+    if(it.rest){
+      timers.push(setTimeout(function(){ it.rest.classList.add("now"); }, Math.max(0, it.t - it.gap + 240)));
+      timers.push(setTimeout(function(){ it.rest.classList.remove("now"); }, it.t));
+    }
+    timers.push(setTimeout(function(){
+      voice(it.s, 0, it.note.f);
+      if(it.s.id === "ton") voice(it.s, .03, it.note.f*1.5, .38);
+      animate(it.s); pop(it.s);
+      if(it.chip){
+        clearNow();
+        it.chip.classList.add("now");
+        tape.scrollLeft = it.chip.offsetLeft - tape.clientWidth/2 + it.chip.offsetWidth/2;
+      }
+    }, it.t));
+  });
+  timers.push(setTimeout(stopPlay, items[items.length-1].t + 650));
+}
+
+playBtn.addEventListener("click", playTape);
+document.getElementById("clear").addEventListener("click", function(){
+  dropQueue(); stopPlay(); seedTape(); schedulePreview();
+});
+
+var muteBtn = document.getElementById("mute");
+muteBtn.addEventListener("click", function(){
+  muted = !muted;
+  muteBtn.textContent = muted ? "Звук: выключен" : "Звук: включён";
+  muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+  if(master) master.gain.value = muted ? 0 : .26;
+});
+
+/* ======================================================================
+   КАРТОЧКА ПЕСНИ — прототип NFT для TON.
+
+   Всё, что ниже, написано как зеркало будущего контракта: только целые
+   числа, никакого Math.random и никаких обращений ко времени. Одна и та же
+   песня обязана давать побайтово одинаковый SVG здесь и в get-методе
+   коллекции — это и будет критерием приёмки при переносе на FunC/Tact.
+
+   Вход минта — только байты песни. Картинку фронт не передаёт и передать
+   не может: иначе в неё можно было бы нарисовать что угодно.
+   ====================================================================== */
+
+/* TTN:BEGIN — эталонная реализация. Всё между этим маркером и TTN:END должно
+   оставаться самодостаточным: тест паритета (test/parity.mjs) извлекает этот
+   кусок прямо отсюда и исполняет отдельно, чтобы второй копии кода не было. */
+
+var ORDER = ["ti","tu","ta","ton"];
+
+function plural(n, one, few, many){
+  var a = n % 10, b = n % 100;
+  if(a === 1 && b !== 11) return one;
+  if(a >= 2 && a <= 4 && (b < 10 || b >= 20)) return few;
+  return many;
+}
+
+/* окружность в фиксированной точке, Q10 — в контракте это литеральная константа */
+var COS64 = [1024,1019,1004,980,946,903,851,792,724,650,569,483,392,297,200,100,
+  0,-100,-200,-297,-392,-483,-569,-650,-724,-792,-851,-903,-946,-980,-1004,-1019,
+  -1024,-1019,-1004,-980,-946,-903,-851,-792,-724,-650,-569,-483,-392,-297,-200,-100,
+  0,100,200,297,392,483,569,650,724,792,851,903,946,980,1004,1019];
+function COS(i){ return COS64[i & 63]; }
+function SIN(i){ return COS64[(i + 48) & 63]; }
+function idiv(a, b){ return Math.floor(a / b); }   /* TVM делит с округлением вниз */
+
+/* ---------------- кодек песни ----------------
+   TTN1 | tempo | groove | n | n×[cc oo gggg]
+   7 + 118 = 125 байт — влезает в одну ячейку TON (127), значит хеш можно
+   взять родным string_hash без склейки змейки. */
+var MAX_NOTES = 118;
+
+/* Три правила, которыми молчание превращается в музыку. Они вынесены сюда
+   не для красоты: по ним считает и карточка, и лента под квартетом, и
+   признак «Пауз». Второго набора не существует — иначе лента обещала бы
+   один темп и одни паузы, а на чейне оказались бы другие. */
+var REST_Q = 8;                           /* пауза засчитывается с полутакта, 8/16 */
+
+function tempoOf(gaps){                   /* медианная пауза принимается за восьмую */
+  var bpm = 140;
+  if(gaps.length){
+    var srt = gaps.slice().sort(function(a,b){ return a - b; });
+    bpm = Math.round(60000 / (2 * Math.max(1, srt[srt.length >> 1])));
+  }
+  return Math.max(40, Math.min(200, bpm));
+}
+function sixOf(bpm){ return 60000 / bpm / 4; }                        /* 1/16 в мс */
+function quantize(gap, six){ return Math.max(0, Math.min(15, Math.round(gap / six))); }
+
+/* Предел берётся ЯВНО, а не подразумевается. Молчаливое обрезание — худшее
+   из возможных: человек играет дальше, а в карточку попадает не то, что он
+   слышал. Кто зовёт, тот и решает, сколько слогов брать. */
+function encodeSong(items, limit){
+  var n = Math.min(items.length, limit || MAX_NOTES), i, gaps = [];
+  for(i=1;i<n;i++) gaps.push(items[i].gap);
+
+  var bpm = tempoOf(gaps), six = sixOf(bpm);
+
+  var dev = 0, body = [];
+  for(i=0;i<n;i++){
+    var g = i ? items[i].gap : 0;
+    var q = quantize(g, six);
+    if(i) dev += Math.abs(g - q * six) / six;
+    var id = ORDER.indexOf(items[i].s.id);
+    var oct = 0, notes = items[i].s.notes;
+    for(var k=0;k<notes.length;k++) if(notes[k].f === items[i].note.f) oct = k;
+    body.push(((id & 3) << 6) | ((oct & 3) << 4) | (q & 15));
+  }
+  var groove = gaps.length ? Math.min(255, Math.round(dev / gaps.length * 255)) : 0;
+
+  var bytes = new Uint8Array(7 + n);
+  bytes[0] = 0x54; bytes[1] = 0x54; bytes[2] = 0x4E; bytes[3] = 0x31; /* TTN1 */
+  bytes[4] = bpm - 40;
+  bytes[5] = groove;
+  bytes[6] = n;
+  for(i=0;i<n;i++) bytes[7 + i] = body[i];
+  return bytes;
+}
+
+/* то, что контракт обязан проверить при минте, прежде чем что-то рисовать */
+function decodeSong(b){
+  if(b.length < 8) return null;
+  if(b[0] !== 0x54 || b[1] !== 0x54 || b[2] !== 0x4E || b[3] !== 0x31) return null;
+  var n = b[6];
+  if(n < 1 || n > MAX_NOTES || b.length !== 7 + n) return null;
+  var notes = [];
+  for(var i=0;i<n;i++){
+    var v = b[7 + i];
+    notes.push({ id:(v >> 6) & 3, oct:(v >> 4) & 3, q:v & 15 });
+  }
+  return { bpm:b[4] + 40, groove:b[5], n:n, notes:notes };
+}
+
+function toHexBytes(b){
+  var s = "", i;
+  for(i=0;i<b.length;i++) s += (b[i] < 16 ? "0" : "") + b[i].toString(16);
+  return s;
+}
+
+/* ---------------- SHA-256 ----------------
+   Свой, а не crypto.subtle: страница может жить по data:-адресу, где subtle
+   недоступен, и всё равно нужен ровно тот же алгоритм, что у string_hash в TVM. */
+var K256 = [
+  0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+  0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+  0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+  0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+  0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+
+function rotr(x, k){ return (x >>> k) | (x << (32 - k)); }
+
+function sha256(bytes){
+  var h = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var len = bytes.length, total = (((len + 9) + 63) & ~63);
+  var m = new Uint8Array(total);
+  m.set(bytes); m[len] = 0x80;
+  var bits = len * 8;
+  m[total-4] = (bits >>> 24) & 255; m[total-3] = (bits >>> 16) & 255;
+  m[total-2] = (bits >>> 8) & 255;  m[total-1] = bits & 255;
+
+  var w = new Array(64), off, i;
+  for(off=0; off<total; off+=64){
+    for(i=0;i<16;i++)
+      w[i] = (m[off+i*4] << 24) | (m[off+i*4+1] << 16) | (m[off+i*4+2] << 8) | m[off+i*4+3];
+    for(i=16;i<64;i++){
+      var x = w[i-15], y = w[i-2];
+      var s0 = rotr(x,7) ^ rotr(x,18) ^ (x >>> 3);
+      var s1 = rotr(y,17) ^ rotr(y,19) ^ (y >>> 10);
+      w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
+    }
+    var a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+    for(i=0;i<64;i++){
+      var S1 = rotr(e,6) ^ rotr(e,11) ^ rotr(e,25);
+      var t1 = (hh + S1 + ((e & f) ^ (~e & g)) + K256[i] + w[i]) | 0;
+      var S0 = rotr(a,2) ^ rotr(a,13) ^ rotr(a,22);
+      var t2 = (S0 + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      hh=g; g=f; f=e; e=(d + t1) | 0; d=c; c=b; b=a; a=(t1 + t2) | 0;
+    }
+    h[0]=(h[0]+a)|0; h[1]=(h[1]+b)|0; h[2]=(h[2]+c)|0; h[3]=(h[3]+d)|0;
+    h[4]=(h[4]+e)|0; h[5]=(h[5]+f)|0; h[6]=(h[6]+g)|0; h[7]=(h[7]+hh)|0;
+  }
+  var out = "";
+  for(i=0;i<8;i++) out += ("0000000" + (h[i] >>> 0).toString(16)).slice(-8);
+  return out;
+}
+
+/* ---------------- ГПСЧ: LCG на uint64 ----------------
+   BigInt, чтобы биты совпали с TVM один в один. */
+function prngFrom(hex){
+  var x = BigInt("0x" + hex.slice(0, 16));
+  var M = (1n << 64n) - 1n;
+  return function(){
+    x = (x * 6364136223846793005n + 1442695040888963407n) & M;
+    return Number((x >> 33n) & 0x7FFFFFFFn);
+  };
+}
+function rint(r, n){ return r() % n; }
+
+/* Ступень гаммы по паре «кто поёт» и «какую из своих нот».
+   0 = до, 6 = си. У Тонтона все три октавы — одна и та же до. */
+var RANKS = [[6,5,6,6],[4,3,4,4],[2,1,2,2],[0,0,0,0]];
+function rankOf(id, oct){ return RANKS[id][oct]; }
+
+/* Высота для времени суток — не то же самое, что ступень гаммы.
+   Ступень говорит, какая это нота (и рисует столбик в партитуре), а высота
+   учитывает ещё и октаву: до₃ у Тонтона тянет карточку в ночь сильнее, чем
+   его же до₅. Иначе выбор октавы на картинку не влиял бы вовсе. */
+var PITCH = [[6,5,6,6],[4,3,4,4],[2,1,2,2],[0,-3,-6,-6]];
+function pitchOf(id, oct){ return PITCH[id][oct]; }
+
+/* ---------------- признаки: часть из музыки, часть из хеша ---------------- */
+function traitsOf(song){
+  var counts = [0,0,0,0], i, low = 0, rests = 0, ids = [];
+  var seen = 0, sum = 0;                      /* какие ступени встретились и как высоко пели */
+  for(i=0;i<song.notes.length;i++){
+    var t = song.notes[i];
+    counts[t.id]++;
+    ids.push(t.id);
+    if(t.q >= REST_Q) rests++;
+    if(t.id === 3 && t.oct > low) low = t.oct;
+    seen |= (1 << rankOf(t.id, t.oct));
+    sum += pitchOf(t.id, t.oct);
+  }
+  /* Средняя высота решает, день на карточке или ночь: выше пели — светлее небо.
+     Считаем в десятых долях ступени, целыми числами, как и всё остальное. */
+  var bright = idiv(sum * 10, Math.max(1, song.n));
+  var sky = 0;                                 /* 0 ночь, 1 сумерки, 2 день */
+  if(bright >= 40) sky = 2;
+  else if(bright >= 25) sky = 1;
+  var dom = 0;
+  for(i=1;i<4;i++) if(counts[i] > counts[dom]) dom = i;
+  var line = ids.join(",");
+  var rare = [];
+  if(line.indexOf("0,1,2,3") >= 0) rare.push("Титутатон");   /* спел их имя по порядку */
+  rare.push(quartetWord(counts));
+  if(song.groove < 40) rare.push("Точность ритма");
+  if(ids.length > 2 && line === ids.slice().reverse().join(",")) rare.push("Зеркальная");
+  if(counts[3] && low === 2 && counts[3] === ids.filter(function(v){ return v === 3; }).length) rare.push("Басовая");
+  if(!rests && ids.length >= 12) rare.push("На одном дыхании");
+  if(seen === 127) rare.push("Вся гамма");      /* встретились все семь ступеней */
+
+  return {
+    counts:counts, dom:dom, rests:rests, depth:low, rare:rare, sky:sky, bright:bright,
+    phrase:line.indexOf("0,1,2,3") >= 0,
+    subtitle:song.n + " " + plural(song.n, "слог", "слога", "слогов") + " · " + song.bpm + " уд/мин · грув " + song.groove
+  };
+}
+
+/* ---------------- рендер карточки: целые числа, ничего больше ---------------- */
+var SKIN = [
+  { c:"#69CBB6", d:"#3FA894", s:"#B7EADF", ear:0 },
+  { c:"#F0A15C", d:"#CE7A33", s:"#FBD9B6", ear:1 },
+  { c:"#B694E8", d:"#8C69C4", s:"#DFCCF7", ear:2 },
+  { c:"#7C8CC8", d:"#4A5A8C", s:"#C6CFEA", ear:3 }
+];
+/* Три неба по средней высоте песни: ушли в бас — ночь, забрались наверх —
+   день. Для каждого свои чернила, иначе подписи пропадут на светлом.
+   [верх неба, низ неба, чернила, приглушённые, линия, кочка дальняя, кочка ближняя] */
+var SKY = [
+  ["#1C2450","#090D20","#F2ECFA","#A79FC0","#5A5480","#2C4636","#35543F"],  /* ночь */
+  ["#4A3A6E","#B06A5C","#FDF3E7","#E5C3AE","#8A6A72","#3A4636","#46583C"],  /* сумерки */
+  ["#8FC7E8","#DCEEF6","#243046","#5A6B80","#9FB6C8","#3E6B45","#4F8150"]   /* день */
+];
+var MOSS = "#6E9A63";
+/* Звёзды тремя готовыми оттенками вместо атрибута opacity: короче в байтах
+   и дешевле для растеризатора, который будет делать превью на маркетплейсе. */
+var STAR = ["#6E77A0","#98A1C6","#C9CFE8"];
+var CLOUD = ["#FFFFFF","#F3FAFF","#E4F1FA"];
+/* Родовые имена "serif"/"monospace" не спасали: у серверного рендерера,
+   который маркетплейсы и кошельки используют для превью (imgproxy на
+   tonapi.io), не нашлось ни одного шрифта с кириллицей вообще — вместо
+   букв показывались пустые прямоугольники. Чиним тем же приёмом, что и
+   с самой картинкой: шрифт кладём прямо в SVG через @font-face и base64,
+   и результат больше не зависит от того, что стоит на сервере.
+   Подмножество урезано ровно до букв, которые встречаются в подписях
+   карточки — его выдал сабсеттер Google Fonts (css2?...&text=...). */
+var FACE = "TTNSerif, serif", MONO = "TTNMono, monospace";
+
+// Podkova: буквы заголовка (ТИ-ТУ-ТА-ТОН), примет и подвала ("#N"/"черновик").
+var FONT_SERIF_B64 = "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";
+// JetBrains Mono: буквы подзаголовка ("слог/слога/слогов", "уд/мин", "грув").
+var FONT_MONO_B64 = "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";
+
+/* Пушистый контур. Собирается ПОТОКОМ: в памяти держится только первая точка
+   и текущая, никаких массивов вершин. Так он переносится в TVM один в один —
+   массивов там нет вовсе, и вершины пришлось бы складывать в словарь, платя
+   за это газом на каждой ячейке. Порядок вызовов ГПСЧ здесь — часть формата:
+   j первой точки, затем на каждом шаге k изгиба и j следующей точки. */
+function fluffI(cx, cy, rx, ry, steps, amp, rnd){
+  var st = idiv(64, steps);
+  var j0 = 940 + rint(rnd, 121);
+  var x0 = cx + idiv(COS(0) * rx * j0, 1024000);
+  var y0 = cy + idiv(SIN(0) * ry * j0, 1024000);
+  var d = "M" + x0 + " " + y0;
+  for(var i=0;i<steps;i++){
+    var k = 1000 + idiv(amp * (65 + rint(rnd, 70)), 100);
+    var a2 = i * st + idiv(st, 2);
+    var qx = cx + idiv(COS(a2) * rx * k, 1024000);
+    var qy = cy + idiv(SIN(a2) * ry * k, 1024000);
+    var nx = x0, ny = y0;                       /* последний сегмент замыкает контур */
+    if(i < steps - 1){
+      var a = (i + 1) * st, j = 940 + rint(rnd, 121);
+      nx = cx + idiv(COS(a) * rx * j, 1024000);
+      ny = cy + idiv(SIN(a) * ry * j, 1024000);
+    }
+    d += "Q" + qx + " " + qy + " " + nx + " " + ny;
+  }
+  return d + "Z";
+}
+
+function critterCard(kind, cx, baseY, w, asleep, rnd){
+  var sk = SKIN[kind], o = [];
+  var rx = idiv(w, 2), ry = idiv(w * 45, 100), cy = baseY - ry;
+  o.push('<ellipse cx="' + cx + '" cy="' + (baseY + 6) + '" rx="' + idiv(rx * 85, 100) + '" ry="' + idiv(w, 14) + '" fill="#000" opacity=".25"/>');
+
+  if(sk.ear === 0){
+    o.push('<path d="' + fluffI(cx - idiv(rx * 42, 100), cy - idiv(ry * 92, 100), idiv(w, 11), idiv(w, 4), 8, 70, rnd) + '" fill="' + sk.d + '"/>');
+    o.push('<path d="' + fluffI(cx + idiv(rx * 42, 100), cy - idiv(ry * 92, 100), idiv(w, 11), idiv(w, 4), 8, 70, rnd) + '" fill="' + sk.d + '"/>');
+  } else if(sk.ear === 2){
+    o.push('<path d="' + fluffI(cx - idiv(rx * 66, 100), cy - idiv(ry * 74, 100), idiv(w, 7), idiv(w, 7), 8, 170, rnd) + '" fill="' + sk.d + '"/>');
+    o.push('<path d="' + fluffI(cx + idiv(rx * 66, 100), cy - idiv(ry * 74, 100), idiv(w, 7), idiv(w, 7), 8, 170, rnd) + '" fill="' + sk.d + '"/>');
+  } else if(sk.ear === 3){
+    o.push('<path d="' + fluffI(cx - idiv(rx * 88, 100), cy - idiv(ry * 46, 100), idiv(w, 6), idiv(w, 6), 8, 110, rnd) + '" fill="' + sk.d + '"/>');
+    o.push('<path d="' + fluffI(cx + idiv(rx * 88, 100), cy - idiv(ry * 46, 100), idiv(w, 6), idiv(w, 6), 8, 110, rnd) + '" fill="' + sk.d + '"/>');
+  }
+
+  o.push('<path d="' + fluffI(cx, cy, rx, ry, 16, 85, rnd) + '" fill="' + sk.c + '"/>');
+
+  if(sk.ear === 3){  /* мох на старейшине */
+    o.push('<circle cx="' + (cx - idiv(w, 9)) + '" cy="' + (cy - idiv(ry * 92, 100)) + '" r="' + idiv(w, 18) + '" fill="' + MOSS + '"/>');
+    o.push('<circle cx="' + cx + '" cy="' + (cy - idiv(ry * 104, 100)) + '" r="' + idiv(w, 14) + '" fill="' + MOSS + '"/>');
+    o.push('<circle cx="' + (cx + idiv(w, 9)) + '" cy="' + (cy - idiv(ry * 92, 100)) + '" r="' + idiv(w, 18) + '" fill="' + MOSS + '"/>');
+  }
+  /* Живот — простой эллипс, а не пушистый путь: на глаз разницы нет, а это
+     минус путь на каждого зверя и минус полсотни вызовов ГПСЧ. */
+  o.push('<ellipse cx="' + cx + '" cy="' + (cy + idiv(ry * 34, 100)) + '" rx="' + idiv(rx * 56, 100) + '" ry="' + idiv(ry * 50, 100) + '" fill="' + sk.s + '"/>');
+  if(sk.ear === 1){  /* вислые уши — поверх тела */
+    o.push('<path d="' + fluffI(cx - idiv(rx * 104, 100), cy + idiv(ry * 18, 100), idiv(w, 13), idiv(w, 5), 8, 80, rnd) + '" fill="' + sk.d + '"/>');
+    o.push('<path d="' + fluffI(cx + idiv(rx * 104, 100), cy + idiv(ry * 18, 100), idiv(w, 13), idiv(w, 5), 8, 80, rnd) + '" fill="' + sk.d + '"/>');
+  }
+
+  var ex = idiv(rx * 32, 100), ey = cy - idiv(ry * 8, 100), er = idiv(w, 15);
+  if(asleep){
+    o.push('<path d="M' + (cx - ex - er) + ' ' + ey + 'q' + er + ' ' + idiv(er, 2) + ' ' + (er * 2) + ' 0" stroke="#2B2333" stroke-width="' + Math.max(2, idiv(w, 40)) + '" fill="none" stroke-linecap="round"/>');
+    o.push('<path d="M' + (cx + ex - er) + ' ' + ey + 'q' + er + ' ' + idiv(er, 2) + ' ' + (er * 2) + ' 0" stroke="#2B2333" stroke-width="' + Math.max(2, idiv(w, 40)) + '" fill="none" stroke-linecap="round"/>');
+    o.push('<text x="' + (cx + rx) + '" y="' + (cy - ry) + '" font-family="' + FACE + '" font-size="' + idiv(w, 5) + '" fill="' + sk.s + '">z</text>');
+  } else {
+    o.push('<circle cx="' + (cx - ex) + '" cy="' + ey + '" r="' + er + '" fill="#2B2333"/>');
+    o.push('<circle cx="' + (cx + ex) + '" cy="' + ey + '" r="' + er + '" fill="#2B2333"/>');
+    o.push('<circle cx="' + (cx - ex + idiv(er, 3)) + '" cy="' + (ey - idiv(er, 3)) + '" r="' + idiv(er, 3) + '" fill="#FFFFFF"/>');
+    o.push('<circle cx="' + (cx + ex + idiv(er, 3)) + '" cy="' + (ey - idiv(er, 3)) + '" r="' + idiv(er, 3) + '" fill="#FFFFFF"/>');
+    o.push('<ellipse cx="' + cx + '" cy="' + (cy + idiv(ry * 26, 100)) + '" rx="' + idiv(w, 18) + '" ry="' + idiv(w, 13) + '" fill="#6B2440"/>');
+  }
+  o.push('<ellipse cx="' + (cx - idiv(rx * 62, 100)) + '" cy="' + (cy + idiv(ry * 16, 100)) + '" rx="' + idiv(w, 14) + '" ry="' + idiv(w, 22) + '" fill="' + sk.d + '" opacity=".45"/>');
+  o.push('<ellipse cx="' + (cx + idiv(rx * 62, 100)) + '" cy="' + (cy + idiv(ry * 16, 100)) + '" rx="' + idiv(w, 14) + '" ry="' + idiv(w, 22) + '" fill="' + sk.d + '" opacity=".45"/>');
+  return o.join("");
+}
+
+function label(x, y, s, size, fill, anchor, family, ls){
+  return '<text x="' + x + '" y="' + y + '" font-family="' + family + '" font-size="' + size +
+    '" fill="' + fill + '" text-anchor="' + anchor + '"' + (ls ? ' letter-spacing="' + ls + '"' : '') +
+    '>' + s + '</text>';
+}
+
+function renderCard(song, hex, tokenId, tr){
+  var rnd = prngFrom(hex), o = [], i;
+  var sky = SKY[tr.sky];
+  var INK = sky[2], DIM = sky[3], LINE = sky[4];
+
+  o.push('<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">');
+  o.push("<style>@font-face{font-family:'TTNSerif';src:url(data:font/woff2;base64," + FONT_SERIF_B64 +
+    ") format('woff2')}@font-face{font-family:'TTNMono';src:url(data:font/woff2;base64," + FONT_MONO_B64 +
+    ") format('woff2')}</style>");
+  o.push('<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="' + sky[0] + '"/><stop offset="1" stop-color="' + sky[1] + '"/></linearGradient></defs>');
+  o.push('<rect width="1000" height="1400" fill="url(#sky)"/>');
+
+  /* Паузы становятся звёздами, а днём — облаками. Их столько же, просто
+     небо другое: тишина в песне видна и там, и там. */
+  var pieces = 5 + tr.rests * 4;
+  for(i=0;i<pieces;i++){
+    var px2 = 50 + rint(rnd, 900), py2 = 80 + rint(rnd, 640), pr = 2 + rint(rnd, 4);
+    if(tr.sky === 2)
+      o.push('<ellipse cx="' + px2 + '" cy="' + py2 + '" rx="' + (pr * 9) + '" ry="' + (pr * 4) +
+        '" fill="' + CLOUD[rint(rnd, 3)] + '" opacity=".7"/>');
+    else
+      o.push('<circle cx="' + px2 + '" cy="' + py2 + '" r="' + pr + '" fill="' + STAR[rint(rnd, 3)] + '"/>');
+  }
+
+  /* Полная фраза подряд поднимает над поляной светило: ночью луну,
+     днём солнце. Одно и то же достижение, просто в своё время суток. */
+  if(tr.phrase){
+    if(tr.sky === 2){
+      o.push('<circle cx="812" cy="250" r="58" fill="#FFE9A8"/>');
+      o.push('<circle cx="812" cy="250" r="44" fill="#FFF6D6"/>');
+    } else {
+      o.push('<circle cx="812" cy="250" r="54" fill="#F6ECCB"/>');
+      o.push('<circle cx="788" cy="236" r="46" fill="' + sky[0] + '"/>');
+    }
+  }
+
+  /* Имя — четырьмя цветами, по слогу на каждого, в том же порядке, в каком
+     они поют. Не перелив: у слогов есть хозяева, и у каждого свой цвет. */
+  o.push(label(500, 148,
+    '<tspan fill="' + SKIN[0].c + '">ТИ</tspan>' +
+    '<tspan fill="' + SKIN[1].c + '">ТУ</tspan>' +
+    '<tspan fill="' + SKIN[2].c + '">ТА</tspan>' +
+    '<tspan fill="' + SKIN[3].c + '">ТОН</tspan>',
+    62, INK, "middle", FACE, 8));
+  o.push(label(500, 192, tr.subtitle, 21, DIM, "middle", MONO, 1));
+  o.push('<path d="M330 222H670" stroke="' + LINE + '" stroke-width="2"/>');
+
+  /* дальние кочки — чтобы середина карточки не пустовала */
+  o.push('<path d="' + fluffI(250, 1010, 430, 230, 8, 35, rnd) + '" fill="' + sky[1] + '" opacity=".75"/>');
+  o.push('<path d="' + fluffI(790, 1030, 400, 210, 8, 35, rnd) + '" fill="' + sky[1] + '" opacity=".75"/>');
+  /* ближняя кочка, на которой стоит квартет */
+  o.push('<path d="' + fluffI(500, 1120, 640, 210, 8, 45, rnd) + '" fill="' + sky[5] + '"/>');
+  o.push('<path d="' + fluffI(500, 1150, 540, 170, 8, 60, rnd) + '" fill="' + sky[6] + '"/>');
+
+  /* Квартет: кто пел больше — тот крупнее, кто молчал — спит.
+     Раскладка считается по настоящей полуширине каждого: у ТУ вислые уши, у
+     ТОН круглые, и оба выходят за тело, плюс припуск на пушистость контура.
+     Если вчетвером не влезают в полосу — уменьшаем всех и центрируем группу,
+     иначе крайний упирается в рамку. */
+  var HALF_PCT = [58, 62, 58, 65], GAP = -40, BAND_L = 56, BAND_R = 944;
+  var maxC = 1, w = [], half = [], total = 0, j;
+  for(i=0;i<4;i++) if(tr.counts[i] > maxC) maxC = tr.counts[i];
+  for(i=0;i<4;i++) w[i] = 152 + idiv(128 * tr.counts[i], maxC);
+  for(j=0;j<2;j++){
+    total = GAP * 3;
+    for(i=0;i<4;i++){ half[i] = idiv(w[i] * HALF_PCT[i], 100); total += half[i] * 2; }
+    if(total <= BAND_R - BAND_L) break;
+    var sc = idiv((BAND_R - BAND_L) * 100, total);
+    for(i=0;i<4;i++) w[i] = idiv(w[i] * sc, 100);
+  }
+  /* группа нужна не для красоты: по ней тест паритета проверяет, что квартет
+     не вылез за рамку. Кочки и холмы выходят за край намеренно, их считать нельзя. */
+  var x = BAND_L + idiv(BAND_R - BAND_L - total, 2);
+  o.push('<g id="q">');
+  for(i=0;i<4;i++){
+    var cx = x + half[i];
+    o.push(critterCard(i, cx, 962 - (i % 2) * 18, w[i], tr.counts[i] === 0, rnd));
+    x = cx + half[i] + GAP;
+  }
+  o.push('</g>');
+
+  /* редкость */
+  if(tr.rare.length)
+    o.push(label(500, 1166, tr.rare.join("  ·  "), 24, "#F6C9D8", "middle", FACE, 2));
+
+  /* Партитура. Высота столбика — это НОТА, а не то, кто её взял: выше
+     столбик — выше звук. Цвет и так говорит, кто поёт, поэтому высоту
+     можно отдать под настоящую нотную запись — мелодию видно глазами. */
+  o.push('<rect x="60" y="1196" width="880" height="96" rx="24" fill="#0B0F22" opacity=".5"/>');
+  var sumQ = 0;
+  for(i=0;i<song.notes.length;i++) sumQ += song.notes[i].q;
+  var nw = Math.max(5, Math.min(16, idiv(620, song.n)));
+  var u = Math.max(1, Math.min(9, idiv(820 - song.n * (nw + 4), Math.max(1, sumQ))));
+  var x = 84;
+  for(i=0;i<song.notes.length;i++){
+    var t = song.notes[i];
+    x += t.q * u;
+    if(x > 920 - nw) break;
+    var rk = rankOf(t.id, t.oct);
+    o.push('<rect x="' + x + '" y="' + (1268 - rk * 10) + '" width="' + nw + '" height="18" rx="' +
+      idiv(nw, 2) + '" fill="' + SKIN[t.id].c + '"/>');
+    x += nw + 4;
+  }
+
+  o.push(label(70, 1348, "sha256 " + hex.slice(0, 20), 20, DIM, "start", MONO, 0));
+  o.push(label(930, 1348, tokenId ? "#" + tokenId : "черновик", 24, INK, "end", FACE, 1));
+  o.push('<rect x="26" y="26" width="948" height="1348" rx="42" fill="none" stroke="' + LINE + '" stroke-width="3"/>');
+  o.push('</svg>');
+  return o.join("");
+}
+
+/* Атрибуты карточки: те же признаки, что нарисованы на ней, и в том же
+   порядке. Живут здесь, внутри эталона, потому что считает их контракт —
+   фронт только показывает, и совпадение проверяется тестом. */
+var NAMES = ["Тинька", "Тумба", "Таша", "Тонтон"];
+var BASS = ["до₅", "до₄", "до₃"];
+
+function attrsOf(song, tr){
+  var a = [
+    { trait_type:"Доминирует", value:NAMES[tr.dom] },
+    { trait_type:"Нот", value:song.n },
+    { trait_type:"Темп", value:song.bpm },
+    { trait_type:"Грув", value:song.groove },
+    { trait_type:"Глубина баса", value:BASS[tr.depth] },
+    { trait_type:"Пауз", value:tr.rests },
+    { trait_type:"Время суток", value:DAYNAME[tr.sky] }
+  ];
+  for(var i = 0; i < tr.rare.length; i++) a.push({ trait_type:"Приметы", value:tr.rare[i] });
+  return a;
+}
+
+/* Те же признаки, но словами — для описания карточки.
+
+   Ключ attributes в onchain-контенте не читает никто: TEP-64 его попросту
+   не описывает, маркетплейсы берут атрибуты только из offchain-JSON.
+   Проверено на живом индексаторе: из наших ключей он разобрал name,
+   description, image и image_data, а attributes пропустил молча. Описание
+   же читают все — значит, признаки должны быть и там. */
+var DAYPART = ["Ночная", "Сумеречная", "Дневная"];
+var DAYNAME = ["Ночь", "Сумерки", "День"];         /* то же самое существительным — для трейта */
+
+/* Сколько зверят подали голос — от "Соло" до "Полного квартета". Общая для
+   картинки и для attributes: молчание одних и тех же голосов должно
+   читаться одинаково в обоих местах. */
+function quartetWord(counts){
+  var voices = 0, i;
+  for(i=0;i<4;i++) if(counts[i]) voices++;
+  if(voices === 4) return "Полный квартет";
+  if(voices === 3) return "Трио";
+  if(voices === 2) return "Дуэт";
+  return "Соло";
+}
+
+function describeOf(song, tr){
+  var s = DAYPART[tr.sky] + " песня в " + song.n + " " +
+    plural(song.n, "слог", "слога", "слогов") + ", " + song.bpm + " " +
+    plural(song.bpm, "удар", "удара", "ударов") + " в минуту. Чаще всех выводит " +
+    NAMES[tr.dom] +
+    /* Про бас — только если он звучал: иначе выходило «бас уходит в до₅»
+       у песни, где Тонтон вообще не открывал рта. */
+    (tr.counts[3] ? ", бас уходит в " + BASS[tr.depth] : "") +
+    (tr.rests === 0 ? ", и ни разу не прерывает дыхание." : ", пауз " + tr.rests + ".");
+
+  /* Кто промолчал — видно и на картинке: молчавшие спят. */
+  var silent = [], i;
+  for(i = 0; i < 4; i++) if(!tr.counts[i]) silent.push(i);
+  if(silent.length === 1)
+    s += " " + NAMES[silent[0]] + (silent[0] === 3 ? " в этот раз промолчал." : " в этот раз промолчала.");
+  else if(silent.length === 2) s += " Двое проспали всю песню.";
+  else if(silent.length === 3) s += " Пел один, остальные спали.";
+
+  if(tr.phrase)
+    s += tr.sky === 2
+      ? " Квартет спел своё имя, и над поляной встало солнце."
+      : " Квартет спел своё имя, и над поляной взошла луна.";
+
+  /* Приметы не пересказываем текстом: они уезжают в attributes через uri
+     (полуцепочечная раскладка), и повторять список в описании второй раз
+     незачем — оба места считают их из одних tr. */
+  return s;
+}
+
+/* ---- сообщение минта ----
+   Кошельку нужен не наш объект, а BOC — та самая упаковка ячеек, которую
+   поймёт TVM. Ячейки здесь всего две и обе крошечные: в корне код операции
+   «TTN1» и queryId, в ссылке — байты песни. Собираем руками, чтобы страница
+   не тянула килобайты библиотеки ради семидесяти байт. Совпадение с
+   @ton/core проверяется тестом на всех векторах. */
+var CRC_T = null;
+function crc32c(b){
+  if(!CRC_T){
+    CRC_T = new Int32Array(256);
+    for(var n = 0; n < 256; n++){
+      var c = n;
+      for(var k = 0; k < 8; k++) c = (c & 1) ? (0x82F63B78 ^ (c >>> 1)) : (c >>> 1);
+      CRC_T[n] = c;
+    }
+  }
+  var crc = 0xFFFFFFFF, i;
+  for(i = 0; i < b.length; i++) crc = (crc >>> 8) ^ CRC_T[(crc ^ b[i]) & 0xFF];
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+function bocMint(bytes){
+  /* корень: 32 бита кода операции + 64 бита queryId = 12 байт ровно,
+     плюс одна ссылка на песню. d2 = целых байт + байт с хвостом. */
+  var c0 = [1, 24, 0x54, 0x54, 0x4E, 0x31, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+  var c1 = [0, bytes.length * 2];
+  for(var i = 0; i < bytes.length; i++) c1.push(bytes[i]);
+
+  var total = c0.length + c1.length;
+  if(total > 255) return null;                 /* в один байт длины не влезло */
+
+  /* 0x41 — флаг «есть crc32c» и один байт на индекс ссылки */
+  var boc = [0xB5, 0xEE, 0x9C, 0x72, 0x41, 0x01, 2, 1, 0, total, 0]
+    .concat(c0).concat(c1);
+  var crc = crc32c(boc);
+  boc.push(crc & 0xFF, (crc >>> 8) & 0xFF, (crc >>> 16) & 0xFF, (crc >>> 24) & 0xFF);
+
+  var s = "";
+  for(i = 0; i < boc.length; i++) s += String.fromCharCode(boc[i]);
+  return btoa(s);
+}
+
+/* Обратная дорога: в карточке песня лежит одной ячейкой без вложений, и
+   чтобы её сыграть, нужно достать из BOC ровно эти байты. Разбираем только
+   такой случай — одна ячейка, ни одной ссылки; всё остальное не наше. */
+function unbocSong(str){
+  /* Кошельки отдают BOC в base64, индексаторы — в hex. Различаем по виду:
+     base64 нашей ячейки всегда начинается с «te6», а это не шестнадцатеричное. */
+  var b, i;
+  if(/^[0-9a-fA-F]+$/.test(str) && str.length % 2 === 0){
+    b = new Uint8Array(str.length / 2);
+    for(i = 0; i < b.length; i++) b[i] = parseInt(str.substr(i * 2, 2), 16);
+  } else {
+    var raw = atob(str);
+    b = new Uint8Array(raw.length);
+    for(i = 0; i < raw.length; i++) b[i] = raw.charCodeAt(i);
+  }
+  if(b.length < 12 || b[0] !== 0xB5 || b[1] !== 0xEE || b[2] !== 0x9C || b[3] !== 0x72) return null;
+
+  var size = b[4] & 7, off = b[5], p = 6;
+  var cells = 0, roots = 0;
+  for(i = 0; i < size; i++) cells = cells * 256 + b[p++];
+  for(i = 0; i < size; i++) roots = roots * 256 + b[p++];
+  p += size;                                  /* absent, всегда ноль */
+  p += off;                                   /* общий размер ячеек */
+  if(cells !== 1 || roots !== 1) return null;
+  p += roots * size;                          /* список корней */
+
+  var d1 = b[p++], d2 = b[p++];
+  if((d1 & 7) !== 0) return null;             /* со ссылками — не наш случай */
+  var len = (d2 >> 1) + (d2 & 1);
+  if((d2 & 1) || p + len > b.length) return null;    /* хвост не по границе байта */
+  return b.slice(p, p + len);
+}
+
+/* TTN:END */
+
+/* ---------------- эмуляция чейна ---------------- */
+
+/* ---------------- панель ---------------- */
+var cardHold = document.getElementById("cardHold");
+var specsEl = document.getElementById("specs");
+var ggOut = document.getElementById("ggOut");
+var cardState = document.getElementById("cardState");
+var metaOut = document.getElementById("metaOut");
+var metaBtn = document.getElementById("metaBtn");
+var current = null, previewPending = 0;
+
+function currentItems(){
+  if(seq.length) return seq;
+  var six = 60000 / 140 / 4, demo = [];
+  CAST.forEach(function(s, i){
+    demo.push({ s:s, note:s.notes[level[s.id]], gap:i ? Math.round(2 * six) : 0 });
+  });
+  return demo;
+}
+
+function utf8len(s){
+  var n = 0, i, c;
+  for(i=0;i<s.length;i++){ c = s.charCodeAt(i); n += c < 128 ? 1 : (c < 2048 ? 2 : 3); }
+  return n;
+}
+
+/* Столько слогов принимает контракт: ровно столько, сколько партитура на
+   карточке способна показать честно. Играть можно и дальше — просто в
+   карточку войдёт начало, и об этом говорится вслух. */
+var MINT_LIMIT = 48;
+
+/* Карточка целиком выводится из байтов — больше ей ничего не нужно. Отсюда
+   и возможность открыть чужую: байты лежат в NFT, и этого достаточно. */
+function cardFromBytes(bytes, tokenId){
+  var song = decodeSong(bytes);
+  if(!song) return null;
+  var hex = sha256(bytes);
+  var tr = traitsOf(song);
+  return { bytes:bytes, song:song, hex:hex, tr:tr,
+           svg:renderCard(song, hex, tokenId, tr), tokenId:tokenId };
+}
+
+function buildCard(tokenId){
+  return cardFromBytes(encodeSong(currentItems(), MINT_LIMIT), tokenId);
+}
+
+function showCard(c){
+  current = c;
+  cardHold.innerHTML = c.svg;
+  var svgBytes = utf8len(c.svg);
+  specsEl.innerHTML =
+    '<dt>песня</dt><dd>' + c.bytes.length + ' байт · ' + Math.ceil(c.bytes.length / 127) + ' ячейка</dd>' +
+    '<dt>байты</dt><dd>' + toHexBytes(c.bytes) + '</dd>' +
+    '<dt>sha256</dt><dd>' + c.hex + '</dd>' +
+    '<dt>картинка</dt><dd>' + svgBytes + ' байт · <b>' + Math.ceil(svgBytes / 127) + '</b> ячеек змейки</dd>' +
+    '<dt>приметы</dt><dd>' + (c.tr.rare.length ? c.tr.rare.join(", ") : "—") + '</dd>';
+  ggOut.innerHTML = ggPreview(c);
+  if(!metaOut.hidden) metaOut.textContent = metaText(c);
+}
+
+/* Имя и описание — ровно то, что положит контракт в get_nft_content:
+   тот же порядок слов, что и на настоящей карточке. Используются и в сыром
+   JSON-виде ниже, и в предпросмотре «как на Getgems» рядом с карточкой. */
+function nftName(c){ return "Титутатон #" + (c.tokenId || "—"); }
+function nftDescription(c){
+  return "Песня квартета мохоседов: " + describeOf(c.song, c.tr) +
+    " Картинка выведена из байтов песни прямо на чейне: тот же хеш — та же " +
+    "картинка. По ленте внизу карточку можно сыграть.";
+}
+
+function metaText(c){
+  var attrs = attrsOf(c.song, c.tr);
+  var svgBytes = utf8len(c.svg);
+  return "// TEP-64, onchain-контент: префикс 0x00, ключи словаря — sha256 имени поля\n" +
+    "// значения — змейкой по 127 байт; всё это отдаёт get_nft_content коллекции\n\n" +
+    JSON.stringify({
+      name: nftName(c),
+      description: nftDescription(c),
+      attributes: attrs,
+      image_data: c.svg.slice(0, 72) + "… [" + svgBytes + " байт]"
+    }, null, 2);
+}
+
+/* Тот же кусок метаданных — не JSON-дампом, а так, как их разложил бы сам
+   Getgems: имя, описание абзацем и трейты плитками, редкости — розовым.
+   Один источник данных с metaText(), просто другая раскладка. */
+function ggPreview(c){
+  var attrs = attrsOf(c.song, c.tr);
+  var tiles = attrs.map(function(a){
+    var cls = a.trait_type === "Приметы" ? "gg-trait rare" : "gg-trait";
+    return '<div class="' + cls + '">' +
+      '<span class="gg-trait-type">' + a.trait_type + '</span>' +
+      '<span class="gg-trait-value">' + a.value + '</span></div>';
+  }).join("");
+  return '<p class="gg-name">' + nftName(c) + '</p>' +
+    '<p class="gg-desc">' + nftDescription(c) + '</p>' +
+    '<div class="gg-traits">' + tiles + '</div>';
+}
+
+function drawPreview(){
+  var c = buildCard(null);
+  if(!c) return;
+  cardState.textContent = seq.length ? "черновик" : "пример";
+  showCard(c);
+
+  /* Кнопка обязана называть то, что сделает. Если наиграно больше, чем
+     помещается, она так и говорит — сюрприза при минте не будет. */
+  var mintBtn = document.getElementById("mintBtn");
+  mintBtn.textContent = seq.length > MINT_LIMIT
+    ? "Отчеканить первые " + MINT_LIMIT + " за " + PRICE
+    : "Отчеканить за " + PRICE;
+}
+
+/* Первый показ — сразу, без ожидания кадра: страница может открыться в
+   свёрнутой панели, где кадры не приходят, и карточка не появилась бы вовсе. */
+function schedulePreview(){
+  if(previewPending) return;
+  previewPending = requestAnimationFrame(function(){ previewPending = 0; drawPreview(); });
+}
+
+/* ================== НАСТОЯЩИЙ МИНТ ==================
+
+   Кошелёк подключается по TON Connect, песня уходит в контракт, карточку
+   рисует он же. Библиотека подгружается только по первому нажатию: пока в
+   кошелёк не заходят, страница остаётся тем, чем была, — четырьмя зверятами
+   без единой внешней зависимости. */
+
+var CFG = window.TTN_NET || {};
+var COLLECTION = CFG.COLLECTION || "";
+var API = CFG.API;
+
+/* Цена и сеть называются вслух в четырёх местах сразу, и все четыре обязаны
+   читать их из настроек. Вписанные руками, они переживут переезд в мейннет
+   молча: страница так и будет обещать тестовые монеты по старой цене, и
+   заметит это первым тот, кто заплатит. */
+var IS_TESTNET = CFG.NETWORK === "-3";
+var PRICE = (Number(CFG.PRICE_NANO || 0) / 1e9) + " TON";
+
+var mintNote = document.getElementById("mintNote");
+var thanks = document.getElementById("thanks");
+var thanksLinks = document.getElementById("thanksLinks");
+var minting = false;
+
+function say(text){ mintNote.textContent = text; }
+
+say("Чеканит контракт, а не мы: " + PRICE + (IS_TESTNET ? " в тестовой сети" : "") +
+    " — единственная трата на всём сайте.");
+
+/* Кошелёк и настройки лежат в соседних файлах. Если страницу открыли так,
+   что соседи не подгрузились — двойным щелчком из папки или из чужого
+   просмотрщика, — зверята обязаны петь как ни в чём не бывало. Молчит
+   только чеканка, и она об этом говорит — теми словами, которые нужны тому,
+   кто их читает: из папки это видим мы, с сайта — посетитель, и звать его
+   поднимать наш локальный сервер незачем. */
+function noWalletText(){
+  return location.protocol === "file:"
+    ? "Кошелёк не подключается к странице, открытой прямо из папки: нужен обычный адрес, а не file://."
+    : "Не загрузился кошелёк, поэтому чеканка молчит. Попробуйте обновить страницу.";
+}
+
+var walletBtn = document.getElementById("walletBtn");
+if(window.Wallet){
+  window.Wallet.bind(walletBtn);
+  window.Wallet.on(function(account){
+    if(account && account.chain !== CFG.NETWORK)
+      say(IS_TESTNET
+        ? "Кошелёк не в тестовой сети. Переключите его — иначе уйдут настоящие монеты."
+        : "Кошелёк не в основной сети. Переключите его — иначе чеканка не пройдёт.");
+  });
+} else {
+  walletBtn.disabled = true;
+  walletBtn.textContent = "Кошелёк недоступен";
+  say(noWalletText() + " Петь и играть ленту можно прямо отсюда.");
+}
+
+/* Спрашиваем у коллекции, не занята ли песня. Гет-методы бесплатны, так что
+   это честнее, чем дать человеку заплатить за отказ. */
+function isTaken(hex){
+  var url = API + "/blockchain/accounts/" + COLLECTION + "/methods/song_minted?args=0x" + hex;
+  return fetch(url).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if(!j || !j.success || !j.stack || !j.stack.length) return 0;
+    var v = j.stack[0];
+    return parseInt(v.num || v.value || "0", 16) || 0;
+  }).catch(function(){ return 0; });      /* сеть молчит — пусть решает контракт */
+}
+
+/* Ждём, пока карточка появится на чейне, и показываем её номер. */
+function waitForToken(hex, steps){
+  return isTaken(hex).then(function(n){
+    if(n) return n;
+    if(steps <= 0) return 0;
+    return new Promise(function(r){ setTimeout(r, 3000); }).then(function(){
+      return waitForToken(hex, steps - 1);
+    });
+  });
+}
+
+function showThanks(tokenId, c){
+  thanks.hidden = false;
+  if(tokenId){
+    c.tokenId = tokenId;
+    c.svg = renderCard(c.song, c.hex, tokenId, c.tr);
+    showCard(c);
+    cardState.textContent = "отчеканена · #" + tokenId;
+    thanksLinks.innerHTML = 'Карточка #' + tokenId + ' — <a href="' + CFG.MARKET + COLLECTION +
+      '" target="_blank" rel="noopener">в коллекции</a> · ' +
+      '<a href="#s=' + toHexBytes(c.bytes) + "&n=" + tokenId +
+      '">сыграть её</a>';
+  } else {
+    thanksLinks.innerHTML = 'Кошелёк отправил, сеть ещё думает — ' +
+      '<a href="' + CFG.EXPLORER + COLLECTION + '" target="_blank" rel="noopener">посмотреть коллекцию</a>';
+  }
+}
+
+document.getElementById("mintBtn").addEventListener("click", function(){
+  if(minting) return;
+  var c = buildCard(null);
+  if(!c) return;
+
+  if(!window.Wallet){
+    say(noWalletText());
+    return;
+  }
+  if(!COLLECTION){
+    say("Коллекция ещё не развёрнута — чеканить пока некуда.");
+    return;
+  }
+  if(c.song.n < 4){
+    say("Нужно хотя бы четыре слога: один — это не песня, а захват номера.");
+    return;
+  }
+  var payload = bocMint(c.bytes);
+  if(!payload){ say("Песня слишком длинная для одного сообщения."); return; }
+
+  minting = true;
+  thanks.hidden = true;
+  say("Смотрим, не занята ли эта песня…");
+
+  window.Wallet.connect().then(function(){
+    if(!window.Wallet.address()) throw new Error("Кошелёк не подключён.");
+    return isTaken(c.hex);
+  }).then(function(n){
+    if(n) throw new Error("Эту песню уже отчеканили — карточка #" + n + ". Сыграйте другую.");
+    say("Подтвердите " + PRICE + " в кошельке…");
+    return window.Wallet.send([
+      { address: COLLECTION, amount: CFG.PRICE_NANO, payload: payload }
+    ]);
+  }).then(function(){
+    say("Отправлено. Ждём, пока карточка родится…");
+    return waitForToken(c.hex, 20);
+  }).then(function(tokenId){
+    say(tokenId ? "Готово." : "Отправлено — карточка вот-вот появится.");
+    showThanks(tokenId, c);
+  }).catch(function(e){
+    say(e && e.message ? e.message : "Не вышло — попробуйте ещё раз.");
+  }).then(function(){ minting = false; });
+});
+
+/* Проиграть карточку — из её байтов, а не из ленты.
+   Это и есть доказательство, что NFT играбельна: на чейне лежат ровно эти
+   байты, и по ним песня восстанавливается целиком — слоги, октавы, темп и
+   паузы. Лента при этом может содержать что угодно другое. */
+var cardPlayBtn = document.getElementById("cardPlayBtn");
+
+function playFromBytes(bytes){
+  var song = decodeSong(bytes);
+  if(!song) return;
+  audio();
+  playing = true;
+  cardPlayBtn.textContent = "Стоп";
+  cardPlayBtn.classList.add("live");
+
+  var six = 60000 / song.bpm / 4, t = 0;
+  song.notes.forEach(function(nt){
+    t += nt.q * six;
+    timers.push(setTimeout(function(){
+      var s = CAST[nt.id];
+      var note = s.notes[Math.min(nt.oct, s.notes.length - 1)];
+      voice(s, 0, note.f);
+      if(s.id === "ton") voice(s, .03, note.f * 1.5, .38);
+      animate(s); pop(s);
+    }, t));
+  });
+  timers.push(setTimeout(stopPlay, t + 700));
+}
+
+cardPlayBtn.addEventListener("click", function(){
+  if(playing){ stopPlay(); return; }
+  if(current) playFromBytes(current.bytes);
+});
+
+metaBtn.addEventListener("click", function(){
+  metaOut.hidden = !metaOut.hidden;
+  metaBtn.setAttribute("aria-expanded", metaOut.hidden ? "false" : "true");
+  metaBtn.textContent = metaOut.hidden ? "Показать метаданные" : "Скрыть метаданные";
+  if(!metaOut.hidden && current) metaOut.textContent = metaText(current);
+});
+
+/* Кочка на поляне.
+
+   Это именно кочка, а не ровная земля: под ней они живут, на ней и стоят.
+   Рисуется тем же кодом, что поляна под квартетом на карточке, — два
+   пушистых холма один за другим.
+
+   Кочка выпуклая, значит под каждым зверем своя высота. Считать её на глаз —
+   тот самый случай, когда потом всю жизнь двигаешь пиксели: спрашиваем у
+   самой фигуры, где у неё верх под этим зверем, и опускаем каждого ровно
+   настолько, чтобы тень легла на землю. */
+(function(){
+  var rnd = prngFrom(sha256(new TextEncoder().encode("кочка Титутатона")));
+  var mEl = document.getElementById("mound");
+  mEl.innerHTML =
+    '<svg viewBox="0 0 1000 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="' + fluffI(500, 250, 640, 210, 8, 45, rnd) + '" fill="var(--mound)"/>' +
+      '<path d="' + fluffI(500, 286, 540, 180, 8, 60, rnd) + '" fill="var(--mound-2)"/>' +
+    '</svg>';
+
+  var seats = [].slice.call(document.querySelectorAll(".glade .seat"));
+  var hill = mEl.querySelector("path");
+  var probe = mEl.firstElementChild.createSVGPoint();
+
+  function groundTop(x, box){
+    var vx = (x - box.left) / box.width * 1000, lo = 0, hi = 200, i, mid;
+    if(vx < 0 || vx > 1000) return null;
+    for(i = 0; i < 20; i++){
+      mid = (lo + hi) / 2;
+      probe.x = vx; probe.y = mid;
+      if(hill.isPointInFill(probe)) hi = mid; else lo = mid;
+    }
+    return hi < 199 ? box.top + hi * (box.height / 200) : null;
+  }
+
+  function seat(tries){
+    seats.forEach(function(s){ s.style.marginBottom = "0px"; });
+    var box = mEl.getBoundingClientRect();
+    /* Страница может открыться в свёрнутой панели, где ширины ещё нет.
+       Тогда ждём кадра: без ширины мерить нечего. */
+    if(!box.width){
+      if(tries > 0) requestAnimationFrame(function(){ seat(tries - 1); });
+      return;
+    }
+    seats.forEach(function(s){
+      var sv = s.querySelector("svg"), el = sv && sv.querySelector("ellipse");
+      if(!el) return;
+      var r = sv.getBoundingClientRect(), bb = el.getBBox();
+      var shadow = r.top + (bb.y + bb.height) * (r.height / 200);
+      var ground = groundTop(r.left + r.width / 2, box);
+      if(ground !== null) s.style.marginBottom = Math.round(shadow - ground) + "px";
+    });
+
+    /* Ряды точек живут в колонках своих зверей, а звери сидят на выпуклой
+       кочке — у каждого своя высота, и точки шли бы волной. Ставим их на
+       общую линию: на ту, где и так оказался самый нижний ряд. Только вниз
+       и не ниже — поднятый ряд вдавился бы в подпись своего же зверя, а
+       опущенный ниже всех вылез бы из поляны на пульт. */
+    var lift = seats.map(function(s){ return parseFloat(s.style.marginBottom) || 0; });
+    var lowest = Math.min.apply(null, lift);
+    seats.forEach(function(s, i){
+      var row = s.querySelector(".octaves");
+      if(row) row.style.top = (lift[i] - lowest) + "px";
+    });
+    /* Самый нижний ряд может висеть и ниже поляны — тогда поляне нужен
+       запас снизу, иначе точки лягут на пульт. Запас именно внешним
+       отступом: кочка живёт внутри поляны, снаружи её ничем не сдвинуть,
+       а значит и посадка от этого не поедет. */
+    glade.style.marginBottom = Math.max(0, -lowest) + "px";
+  }
+
+  function seatTwice(){ seat(30); seat(30); }   /* второй проход: посадка двигает и саму кочку */
+
+  seatTwice();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(seatTwice);
+  var resizeTimer = 0;
+  addEventListener("resize", function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(seatTwice, 120);
+  });
+})();
+
+drawPreview();
+
+/* Чужая карточка открывается двумя способами. Либо байтами в ссылке —
+   …#s=54544e31640104004282e2&n=1, и тогда не нужна даже сеть. Либо адресом
+   карточки — …#nft=EQ…, и тогда песня достаётся с чейна: в карточке лежат
+   ровно те же байты, из которых контракт нарисовал картинку. */
+(function(){
+  var hash = location.hash || "";
+
+  function openCard(b, tokenId){
+    var c = cardFromBytes(b, tokenId);
+    if(!c){ cardState.textContent = "по ссылке пришла не песня"; return; }
+
+    /* Чужая песня ложится и в ленту тоже. Тогда её поют сами зверята — той
+       же кнопкой «Проиграть ленту», которую человек уже видел наверху, — и
+       не приходится догадываться, что где-то внизу есть вторая кнопка.
+       Слоги видны, паузы на месте, всё как если бы её наиграли здесь. */
+    var step = 60000 / c.song.bpm / 4;
+    seedTape();
+    c.song.notes.forEach(function(nt, i){
+      var s = CAST[nt.id];
+      pushChip(s, s.notes[Math.min(nt.oct, s.notes.length - 1)], i ? Math.round(nt.q * step) : 0);
+    });
+
+    /* Лента только что попросила перерисовать карточку как черновик — но
+       карточка у нас уже есть, настоящая, с номером. Отменяем: как только
+       человек споёт сам, черновик вернётся сам собой. */
+    if(previewPending){ cancelAnimationFrame(previewPending); previewPending = 0; }
+
+    showCard(c);
+    cardPlayBtn.hidden = false;
+    cardState.textContent = tokenId ? "#" + tokenId + " по ссылке" : "по ссылке";
+    tapeInfo.textContent = (tokenId ? "карточка #" + tokenId : "карточка по ссылке") +
+      " · " + c.song.bpm + " уд/мин" +
+      " · " + c.tr.rests + " " + plural(c.tr.rests, "пауза", "паузы", "пауз");
+    /* Полоски тишины — по мерке самой карточки, а не пересчитанной ленты:
+       в ленте лежит её песня, и паузы обязаны совпасть с её же трейтом. */
+    showRests(sixOf(c.song.bpm), seq.length);
+  }
+
+  var nMatch = /[#&]n=(\d+)/.exec(hash);
+  var tokenId = nMatch ? parseInt(nMatch[1], 10) : 0;
+
+  var sMatch = /[#&]s=([0-9a-fA-F]+)/.exec(hash);
+  if(sMatch && sMatch[1].length % 2 === 0){
+    var b = new Uint8Array(sMatch[1].length / 2), i;
+    for(i = 0; i < b.length; i++) b[i] = parseInt(sMatch[1].substr(i * 2, 2), 16);
+    openCard(b, tokenId);
+    return;
+  }
+
+  /* Адрес карточки годится в обоих видах: дружелюбный EQ…/0Q… и сырой
+     0:59a6…, каким его отдаёт индексатор. Оба он же и понимает. */
+  var addr = /[#&]nft=(-?\d:[0-9a-fA-F]{64}|[A-Za-z0-9_-]{48})/.exec(hash);
+  if(!addr) return;
+  cardState.textContent = "спрашиваем у чейна…";
+  fetch(API + "/blockchain/accounts/" + addr[1] + "/methods/get_nft_data")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.success || !j.stack || j.stack.length < 5) throw new Error("нет такой карточки");
+      var song = unbocSong(j.stack[4].cell);
+      if(!song) throw new Error("в карточке лежит не песня");
+      /* номер для человека на единицу больше индекса в цепочке */
+      openCard(song, tokenId || (parseInt(j.stack[1].num, 16) + 1));
+    })
+    .catch(function(e){ cardState.textContent = e.message; });
+})();
+
+/* Шов для проверки паритета с контрактом: те же функции будут вызваны
+   из теста рядом с get-методом в @ton/sandbox, и SVG обязан совпасть побайтово. */
+window.TTN = {
+  encodeSong:encodeSong, decodeSong:decodeSong, sha256:sha256,
+  prngFrom:prngFrom, traitsOf:traitsOf, renderCard:renderCard, attrsOf:attrsOf
+};
+
+document.addEventListener("keydown", function(e){
+  if(e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+  if(e.altKey || e.ctrlKey || e.metaKey) return;
+  if(e.repeat) return;              /* зажатая клавиша — не игра, а залипание */
+  if(e.key === "0"){ e.preventDefault(); playTape(); return; }
+  var k = "123456789".indexOf(e.key);
+  if(k < 0 || k >= KEYS.length) return;
+  e.preventDefault();
+  strike(KEYS[k].s, KEYS[k].i);
+  nodes[KEYS[k].s.id].focus();
+});
+})();
+</script>

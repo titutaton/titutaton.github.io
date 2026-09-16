@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Титутатон — отчеканенные песни</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Podkova:wght@600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<!--
+  Галерея карточек.
+
+  Читает коллекцию прямо с чейна и ничего не хранит у себя: ни картинок, ни
+  базы, ни списка. Картинка каждой карточки лежит в её метаданных на чейне,
+  поэтому здесь нечего рисовать — только показать.
+
+  Картинки вставляются через <img src="data:…">, а не разметкой внутрь
+  страницы: содержимое приходит из сети, и пусть оно остаётся картинкой, чем
+  бы ни оказалось.
+-->
+<style>
+/* Те же токены, что на странице со зверятами: сайт должен выглядеть одним
+   сайтом, а не двумя. Светлая и тёмная темы обе. */
+:root{
+  --ground:#E7EFE6;
+  --ground-2:#F5F9F2;
+  --ink:#2F2B3C;
+  --ink-soft:#6C6579;
+  --line:#D3DFD1;
+  --card:rgba(255,255,255,.72);
+  --shadow:rgba(47,43,60,.13);
+  --accent:#D9426D;
+  --night:#0B0F22;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#191520;
+    --ground-2:#221B2C;
+    --ink:#F4EBF3;
+    --ink-soft:#B3A6BE;
+    --line:#3A3046;
+    --card:rgba(40,32,52,.66);
+    --shadow:rgba(0,0,0,.4);
+    --accent:#FF8FAC;
+  }
+}
+*{box-sizing:border-box}
+/* Полоса прокрутки всегда занимает своё место: иначе на короткой странице
+   колонка съезжает на полполосы, и при переходе шапка прыгает. */
+html{scrollbar-gutter:stable}
+body{
+  overflow-x:clip;margin:0;min-height:100vh;
+  background:
+    radial-gradient(900px 420px at 12% -8%, var(--ground-2), transparent 70%),
+    radial-gradient(700px 380px at 92% 4%, var(--ground-2), transparent 65%),
+    var(--ground);
+  color:var(--ink);
+  font-family:"Nunito","Segoe UI",system-ui,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
+}
+.page{max-width:1020px;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(12px,3vw,28px) 64px}
+
+/* ---------- шапка ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 clamp(10px,3vw,22px)}
+.brand{
+  display:inline-flex;gap:0;text-decoration:none;
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4vw,21px);
+  letter-spacing:.01em;line-height:1;
+}
+.brand .s{display:inline-block}
+.brand .s:nth-child(1){color:var(--ti-deep)}
+.brand .s:nth-child(2){color:var(--tu-deep)}
+.brand .s:nth-child(3){color:var(--ta-deep)}
+.brand .s:nth-child(4){color:var(--ton-deep)}
+.brand:hover .s{filter:brightness(1.12)}
+/* цвета слогов — те же, что на главной */
+:root{--ti-deep:#3FA894;--tu-deep:#CE7A33;--ta-deep:#8C69C4;--ton-deep:#3C4C7E}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--ti-deep:#49B7A1;--tu-deep:#D98C43;--ta-deep:#9C7AD4;--ton-deep:#6274B4}
+}
+.top-right{display:flex;align-items:center;gap:10px;position:relative}
+.navlink{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+  text-decoration:none;padding:7px 10px;border-radius:999px;
+}
+.navlink:hover{color:var(--ink)}
+.wallet{
+  appearance:none;font:inherit;cursor:pointer;font-weight:800;font-size:13px;
+  color:var(--accent);background:none;border:2px solid var(--accent);
+  border-radius:999px;padding:0 15px;
+  /* высота задана явно: подключённый кошелёк пишется другим шрифтом, и без
+     этого шапка на двух страницах оказывалась разной высоты */
+  height:34px;display:inline-flex;align-items:center;
+}
+.wallet:hover{background:var(--accent);color:var(--ground)}
+.wallet.on{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:500;font-size:11.5px;
+  color:var(--ink-soft);border-color:var(--line);border-width:1px;padding:0 13px;
+}
+.wallet.on:hover{color:var(--ink);background:none;border-color:var(--ink-soft)}
+.wallet:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wallet-menu{
+  position:absolute;top:calc(100% + 8px);right:0;z-index:20;min-width:190px;
+  display:flex;flex-direction:column;gap:2px;padding:8px;
+  background:var(--ground-2);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 12px 30px var(--shadow);
+}
+.wallet-menu-addr{
+  margin:0 0 4px;padding:4px 8px;color:var(--ink-soft);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
+}
+.wallet-menu a,.wallet-menu button{
+  appearance:none;border:0;background:none;font:inherit;font-size:14px;text-align:left;
+  color:var(--ink);text-decoration:none;padding:7px 8px;border-radius:9px;cursor:pointer;
+}
+.wallet-menu a:hover,.wallet-menu button:hover{background:var(--card);color:var(--accent)}
+
+/* ---------- заголовок и управление ---------- */
+header{text-align:center;margin:0 0 clamp(14px,3vw,26px)}
+h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(26px,5.6vw,42px);letter-spacing:.08em}
+.lede{margin:8px auto 0;max-width:62ch;color:var(--ink-soft);font-size:clamp(13.5px,3vw,16px);text-wrap:pretty}
+
+.bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:12px clamp(12px,3vw,18px);backdrop-filter:blur(6px);
+}
+.tabs{display:flex;gap:4px;background:var(--ground-2);border-radius:999px;padding:3px}
+.tab{
+  appearance:none;border:0;background:none;font:inherit;font-weight:800;font-size:13.5px;
+  color:var(--ink-soft);padding:7px 15px;border-radius:999px;cursor:pointer;
+}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--ground)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tab:disabled,.find:disabled{opacity:.5;cursor:default}
+.find{
+  flex:1 1 220px;min-width:0;font:inherit;font-size:14px;color:var(--ink);
+  background:var(--ground-2);border:1px solid var(--line);border-radius:999px;padding:9px 16px;
+}
+.find:focus{outline:2px solid var(--accent);outline-offset:1px}
+.state{
+  margin:14px 0 0;text-align:center;color:var(--ink-soft);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;
+}
+
+/* ---------- сетка карточек ---------- */
+.grid{margin:18px 0 0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.card img{display:block;width:100%;height:auto;background:var(--night)}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.name{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:17px}
+.rare{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.rare span{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--ground-2);color:var(--accent)}
+.facts{margin:0;color:var(--ink-soft);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px}
+.desc{
+  margin:0;color:var(--ink-soft);font-size:12.5px;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.go{
+  margin-top:auto;text-align:center;text-decoration:none;font-weight:800;font-size:14px;
+  padding:9px 14px;border-radius:999px;border:2px solid var(--line);color:var(--ink);
+}
+.go:hover{border-color:var(--accent);color:var(--accent)}
+.more{
+  display:block;margin:26px auto 0;padding:11px 22px;border-radius:999px;
+  border:2px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:800;cursor:pointer;
+}
+/* после .more, иначе правило display:block его переспорит */
+.more[hidden]{display:none}
+.more:hover{border-color:var(--accent);color:var(--accent)}
+footer{margin:30px 0 0;text-align:center;color:var(--ink-soft);font-size:12.5px}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="top">
+    <a class="brand" href="./"><span class="s">Ти</span><span class="s">ту</span><span class="s">та</span><span class="s">тон</span></a>
+    <div class="top-right">
+      <a class="navlink" href="./">К зверятам</a>
+      <button class="wallet" id="walletBtn" type="button">Подключить кошелёк</button>
+    </div>
+  </nav>
+
+  <header>
+    <h1>Отчеканенные песни</h1>
+    <p class="lede">Каждую карточку нарисовал контракт из байтов её песни — и каждую можно послушать.</p>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tabAll" role="tab" aria-selected="true" type="button">Все</button>
+      <button class="tab" id="tabMine" role="tab" aria-selected="false" type="button">Мои</button>
+    </div>
+    <input class="find" id="find" type="search" placeholder="Номер, редкость или зверь — например, 12 или зеркальная" aria-label="Поиск по карточкам">
+  </div>
+
+  <p class="state" id="state">спрашиваем у чейна…</p>
+  <div class="grid" id="grid"></div>
+  <button class="more" id="more" hidden>Показать ещё</button>
+  <footer id="foot"></footer>
+</div>
+
+<script src="settings.js"></script>
+<script src="wallet.js"></script>
+<script>
+(function(){
+"use strict";
+
+var CFG = window.TTN_NET || {};
+/* Адрес коллекции можно подменить в ссылке — удобно, пока их несколько */
+var fromUrl = /[?&]c=([A-Za-z0-9_-]{48})/.exec(location.search);
+var COLLECTION = fromUrl ? fromUrl[1] : (CFG.COLLECTION || "");
+var BATCH = 20;
+
+var grid = document.getElementById("grid");
+var state = document.getElementById("state");
+var more = document.getElementById("more");
+var foot = document.getElementById("foot");
+var find = document.getElementById("find");
+var tabAll = document.getElementById("tabAll");
+var tabMine = document.getElementById("tabMine");
+
+var mode = /[?&]mine\b/.test(location.search) ? "mine" : "all";
+var cards = [], total = 0, taken = 0, busy = false, done = false;
+
+function say(s){ state.textContent = s; }
+
+/* ---------- разбор того, что отдал индексатор ---------- */
+
+/* Признаки карточки — берём готовыми, ничего не угадываем.
+
+   Карточка на чейне уже несёт и attributes (полуцепочечной раскладкой:
+   uri → data:-JSON, индексатор сливает её с остальными полями сам), и
+   description. Если индексатор это прочитал — вот они; если не прочитал —
+   их просто нет, и вытаскивать их из текста описания смысла не имеет:
+   описание — рассказ о песне, а не запасной способ доставить те же данные
+   вторым путём. */
+function traitsOf(meta){
+  var attrs = (meta && meta.attributes) || [], rare = [], facts = [];
+  for(var i = 0; i < attrs.length; i++){
+    var a = attrs[i];
+    if(a.trait_type === "Приметы") rare.push(String(a.value));
+    else facts.push(a.trait_type + ": " + a.value);
+  }
+  return { rare: rare, facts: facts.join(" · ") };
+}
+
+function imageOf(meta){
+  /* Один индексатор отдаёт image_data уже в base64, другой — сырым SVG;
+     различаем по первому символу, а не по вере в документацию. */
+  var d = meta.image_data;
+  if(d) return "data:image/svg+xml;base64," + (d.charAt(0) === "<"
+    ? btoa(unescape(encodeURIComponent(d))) : d);
+  return meta.image || "";
+}
+
+function cardOf(item){
+  var meta = item.metadata || {};
+  var t = traitsOf(meta);
+  var desc = meta.description || "";
+  return {
+    address: item.address,
+    name: meta.name || "Титутатон",
+    image: imageOf(meta),
+    rare: t.rare,
+    facts: t.facts,
+    desc: desc,
+    search: ((meta.name || "") + " " + t.rare.join(" ") + " " + t.facts + " " + desc).toLowerCase(),
+  };
+}
+
+/* ---------- показ ---------- */
+
+function nodeOf(c){
+  var el = document.createElement("article");
+  el.className = "card";
+
+  var img = document.createElement("img");
+  img.loading = "lazy";
+  img.alt = c.name;
+  if(c.image) img.src = c.image;
+  el.appendChild(img);
+
+  var body = document.createElement("div");
+  body.className = "body";
+
+  var h = document.createElement("p");
+  h.className = "name";
+  h.textContent = c.name;
+  body.appendChild(h);
+
+  if(c.rare.length){
+    var r = document.createElement("p");
+    r.className = "rare";
+    c.rare.forEach(function(word){
+      var s = document.createElement("span");
+      s.textContent = word;
+      r.appendChild(s);
+    });
+    body.appendChild(r);
+  }
+
+  if(c.facts){
+    var f = document.createElement("p");
+    f.className = "facts";
+    f.textContent = c.facts;
+    body.appendChild(f);
+  }
+
+  if(c.desc){
+    var d = document.createElement("p");
+    d.className = "desc";
+    d.textContent = c.desc;
+    body.appendChild(d);
+  }
+
+  var a = document.createElement("a");
+  a.className = "go";
+  a.href = "index.html#nft=" + c.address;
+  a.textContent = "Сыграть";
+  body.appendChild(a);
+
+  el.appendChild(body);
+  return el;
+}
+
+function redraw(){
+  var query = find.value.trim().toLowerCase().replace(/^#/, "");
+  grid.textContent = "";
+  var shown = 0;
+  cards.forEach(function(c){
+    if(query && c.search.indexOf(query) < 0) return;
+    grid.appendChild(nodeOf(c));
+    shown++;
+  });
+  if(query) say(shown ? "Нашлось: " + shown : "Ничего не нашлось — попробуйте номер или редкость");
+  else summary();
+}
+
+function summary(){
+  if(mode === "mine"){
+    say(cards.length ? "Ваших карточек: " + cards.length : "У этого кошелька карточек пока нет");
+    return;
+  }
+  if(!cards.length){ say("Пока ни одной песни. Первая — ваша."); return; }
+  say("Карточек: " + cards.length + (done ? "" : " · есть ещё"));
+}
+
+/* ---------- чтение с чейна ---------- */
+
+function fetchTotal(){
+  return fetch(CFG.API + "/nfts/collections/" + COLLECTION)
+    .then(function(r){ if(!r.ok) throw new Error("коллекция не отвечает (" + r.status + ")"); return r.json(); })
+    .then(function(j){ total = j.next_item_index || 0; });
+}
+
+/* Свежие сверху: коллекция отдаёт по возрастанию номера, поэтому читаем с
+   хвоста — последние двадцать, потом предыдущие двадцать. */
+function loadAll(){
+  var first = total ? Promise.resolve() : fetchTotal();
+  return first.then(function(){
+    if(!total){ more.hidden = true; summary(); return; }
+    var take = Math.min(BATCH, total - taken);
+    if(done || take <= 0){ more.hidden = true; return; }
+    var offset = total - taken - take;
+    say(taken ? "читаем дальше…" : "спрашиваем у чейна…");
+
+    return fetch(CFG.API + "/nfts/collections/" + COLLECTION + "/items?limit=" + take + "&offset=" + offset)
+      .then(function(r){ if(!r.ok) throw new Error("чейн ответил " + r.status); return r.json(); })
+      .then(function(j){
+        var list = (j.nft_items || []).slice().reverse();
+        list.forEach(function(it){ cards.push(cardOf(it)); });
+        taken += list.length;
+        /* Пришло меньше, чем просили, — значит в коллекции есть дыры (номер
+           занят, а карточки нет) и дальше смотреть нечего. */
+        done = list.length < take || taken >= total;
+        more.hidden = done;
+        redraw();
+      });
+  });
+}
+
+function loadMine(){
+  var who = window.Wallet ? window.Wallet.address() : null;
+  if(!COLLECTION){
+    more.hidden = true;
+    say("Коллекция ещё не развёрнута. Когда появится — карточки будут здесь.");
+    return Promise.resolve();
+  }
+  if(!who){
+    more.hidden = true;
+    say("Подключите кошелёк — покажу ваши карточки.");
+    return Promise.resolve();
+  }
+  say("смотрим ваши…");
+  return fetch(CFG.API + "/accounts/" + who + "/nfts?collection=" + COLLECTION + "&limit=1000&offset=0")
+    .then(function(r){ if(!r.ok) throw new Error("чейн ответил " + r.status); return r.json(); })
+    .then(function(j){
+      cards = (j.nft_items || []).slice()
+        .sort(function(a, b){ return (b.index || 0) - (a.index || 0); })
+        .map(cardOf);
+      more.hidden = true;
+      redraw();
+    });
+}
+
+function loadMore(){
+  if(busy) return;
+  busy = true;
+  more.disabled = true;
+  (mode === "mine" ? loadMine() : loadAll())
+    .catch(function(e){ say("Не получилось прочитать коллекцию: " + e.message); })
+    .then(function(){ busy = false; more.disabled = false; });
+}
+
+/* ---------- переключатели ---------- */
+
+function switchTo(to){
+  if(mode === to) return;
+  mode = to;
+  tabAll.setAttribute("aria-selected", String(to === "all"));
+  tabMine.setAttribute("aria-selected", String(to === "mine"));
+  cards = [];
+  taken = 0;
+  done = false;
+  grid.textContent = "";
+  more.hidden = true;
+  loadMore();
+}
+
+tabAll.addEventListener("click", function(){ switchTo("all"); });
+tabMine.addEventListener("click", function(){ switchTo("mine"); });
+more.addEventListener("click", loadMore);
+find.addEventListener("input", redraw);
+
+/* Кошелёк живёт в соседнем файле. Если страницу открыли так, что соседи не
+   подгрузились, галерея всё равно должна показывать карточки — без «моих». */
+var walletBtn = document.getElementById("walletBtn");
+if(!window.Wallet){
+  walletBtn.disabled = true;
+  walletBtn.textContent = "Кошелёк недоступен";
+  tabMine.disabled = true;
+}
+if(window.Wallet) window.Wallet.bind(walletBtn);
+if(window.Wallet) window.Wallet.on(function(account){
+  /* Подключился кошелёк, а мы смотрим «мои» — покажем их сразу */
+  if(mode !== "mine") return;
+  cards = [];
+  grid.textContent = "";
+  if(account) loadMore(); else redraw();
+});
+
+tabAll.setAttribute("aria-selected", String(mode === "all"));
+tabMine.setAttribute("aria-selected", String(mode === "mine"));
+
+if(!COLLECTION){
+  say("Коллекция ещё не развёрнута. Когда появится — карточки будут здесь.");
+  tabAll.disabled = true;
+  tabMine.disabled = true;
+  find.disabled = true;
+} else {
+  foot.innerHTML = 'Коллекция целиком: <a href="' + CFG.MARKET + COLLECTION +
+    '" target="_blank" rel="noopener">на маркетплейсе</a>';
+  loadMore();
+}
+})();
+</script>
+</body>
+</html>
