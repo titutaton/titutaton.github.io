@@ -2145,15 +2145,22 @@ metaBtn.addEventListener("click", function(){
        одну общую линию (чтобы не шли волной) — но общая линия годится
        только зверю с самым низким ground, у остальных либо вминалась в
        подпись, либо торчала из-под кочки: то самое дёрганье и разрезание.
-       Своя линия у каждого — волна вместо гонки за чужой высотой, зато
-       без вычислений, которые могут не сойтись: ground для тени и так
-       всегда внутри травы, эта же точка плюс небольшой отступ вниз. */
+       Своя линия у каждого — волна вместо гонки за чужой высотой.
+
+       Но ground — это где трава на глаз, а не где кончается подпись: на
+       широких экранах кочка выше и ground у неё оказывается ВЫШЕ имени
+       зверя, а не ниже. Без страховки ряд прыгал вверх, в буквы слога.
+       Поэтому цель — не просто ground+отступ, а самая нижняя из двух
+       точек: либо под подошвой, либо под собственной подписью, что бы
+       ни было ниже на экране. */
     seats.forEach(function(s, i){
-      var row = s.querySelector(".octaves");
+      var row = s.querySelector(".octaves"), tag = s.querySelector(".tag");
       if(!row || grounds[i] === null) return;
       row.style.top = "0px";
       var naturalTop = row.getBoundingClientRect().top;
-      row.style.top = Math.round(grounds[i] + 14 - naturalTop) + "px";
+      var minTop = tag ? tag.getBoundingClientRect().bottom + 2 : naturalTop;
+      var target = Math.max(grounds[i] + 14, minTop);
+      row.style.top = Math.round(target - naturalTop) + "px";
     });
     /* Самый нижний зверь может висеть и ниже поляны — тогда поляне нужен
        запас снизу, иначе он лягут на пульт. Запас именно внешним
