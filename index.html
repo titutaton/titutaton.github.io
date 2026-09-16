@@ -106,22 +106,22 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 /* ---------- поляна ---------- */
 .glade{
   position:relative;margin:clamp(12px,3vw,30px) 0 0;padding:22px 0 clamp(8px,1vw,12px);
-  display:grid;grid-template-columns:repeat(4,auto);justify-content:center;align-items:end;
-  gap:clamp(2px,1.6vw,26px);
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-content:center;align-items:end;
+  gap:clamp(2px,1vw,26px);
 }
 /* Кочка — та же поляна, что на карточке, и тем же кодом: контур считает
    fluffI. Держится ширины колонки, как панели под ней, и не растягивается:
    высота идёт за шириной сама. */
 .mound{
-  position:absolute;left:0;right:0;bottom:0;z-index:0;pointer-events:none;line-height:0;
-  height:clamp(150px,20vw,220px);
+  position:absolute;left:0;right:0;bottom:-70px;z-index:0;pointer-events:none;line-height:0;
+  height:calc(clamp(150px,20vw,220px) + 70px);
   border-radius:22px 22px 0 0;overflow:hidden;   /* тот же скруглённый край, что у панелей ниже */
 }
 .mound svg{display:block;width:100%;height:100%}
 
 /* ---------- существа ---------- */
 .critter{
-  position:relative;z-index:1;
+  position:relative;z-index:1;width:100%;max-width:100%;
   appearance:none;background:none;border:0;padding:6px 2px 0;margin:0;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:5px;
   color:inherit;font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
@@ -131,9 +131,9 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .critter:active{transform:translateY(-1px) scale(.98)}
 .critter:focus{outline:none}
 .critter:focus-visible{outline:3px dashed var(--c-deep);outline-offset:4px;border-radius:26px}
-.critter svg{display:block;width:var(--w);height:auto;overflow:visible}
+.critter svg{display:block;width:var(--w);max-width:100%;height:auto;margin:0 auto;overflow:visible}
 
-.seat{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.seat{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;width:100%}
 .seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--w:clamp(60px,19vw,168px);margin-bottom:6px}
 .seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--w:clamp(64px,20vw,176px);margin-bottom:24px}
 .seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--w:clamp(62px,19.5vw,172px);margin-bottom:10px}
@@ -197,28 +197,34 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .critter[data-id="tu"].singing .ear-r{transform:rotate(-13deg)}
 
 /* подпись */
-.tag{display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25}
+.tag{display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25;max-width:100%}
 .syl{
   font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4.4vw,27px);
-  color:var(--c-deep);letter-spacing:.03em;
+  color:var(--c-deep);letter-spacing:.03em;white-space:nowrap;
 }
 .critter[data-id="ton"] .syl{font-size:clamp(22px,5.6vw,36px)}
-.name{font-weight:700;font-size:clamp(12px,3vw,13.5px)}
+.name{font-weight:700;font-size:clamp(12px,3vw,13.5px);white-space:nowrap}
 .note{
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(9.5px,2.5vw,10.5px);
   color:var(--ink-soft);letter-spacing:.02em;font-variant-numeric:tabular-nums;
+  /* Страховка от длинного текста: даже слово без пробелов порвётся,
+     а не раздвинет секцию шире экрана. */
+  max-width:100%;overflow-wrap:anywhere;
 }
+/* Подпись под зверем — в одну строку и мельче: колонка узкая, а перенос
+   дал бы рядам разную высоту. Остальные .note (под пультом) переносятся. */
+.tag .note{font-size:clamp(8px,2.4vw,10.5px);white-space:nowrap}
 /* Переключатель ноты — отдельный ряд кнопок, а не часть силуэта.
    position:relative: сдвиг ряда на общую линию делается только на вид,
    место в колонке остаётся за ним, и поляна от этого не растёт. */
-.octaves{position:relative;display:flex;align-items:center;gap:2px;margin-top:2px}
+.octaves{position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:2px;margin-top:2px;max-width:100%}
 .octaves .cap{
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--ink-soft);margin-right:5px;
 }
 .lvl{
   width:clamp(18px,5.5vw,26px);height:clamp(18px,5.5vw,26px);padding:0;border:0;background:none;cursor:pointer;
-  display:grid;grid-template-areas:"k";place-items:center;
+  display:grid;grid-template-areas:"k";place-items:center;flex:0 0 auto;
   -webkit-tap-highlight-color:transparent;
 }
 /* Кружок и цифра — в одной клетке грида, друг поверх друга: точка осталась
@@ -233,7 +239,7 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
    clamp — до этой ширины кружки и так уже сузились до предела (--w выше),
    а слово рядом продолжало пробивать колонку насквозь. Кружки без слова
    всё ещё понятны — они прямо под слогом и именем своего зверя. */
-@media (max-width:520px){ .octaves .cap{display:none} }
+@media (max-width:700px){ .octaves .cap{display:none} }
 .lvl .num{
   /* position — не прихоть: у выбранного кружка есть transform, а значит и
      свой слой, и без этого цифра оказывается под заливкой. */
@@ -334,6 +340,8 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   text-transform:none;letter-spacing:.04em;color:var(--ink);
   border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-left:8px;
   font-variant-numeric:tabular-nums;white-space:nowrap;
+  display:inline-block;vertical-align:bottom;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;
 }
 .tape{
   display:flex;gap:7px;overflow-x:auto;padding:10px 2px;min-height:54px;align-items:center;
@@ -389,6 +397,9 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .btn.live{border-color:var(--accent);color:var(--accent);box-shadow:0 3px 0 var(--accent)}
 .btn.live:hover{box-shadow:0 5px 0 var(--accent)}
 .btn:focus-visible{outline:3px dashed var(--accent);outline-offset:3px}
+/* Кнопки проигрывания не прыгают в ширине, когда длинное
+   «Проиграть…» становится коротким «Стоп». */
+#play, #cardPlayBtn{min-width:12.5em;max-width:100%}
 
 /* ---------- карточка песни (прототип NFT) ---------- */
 .mintbox{
@@ -396,7 +407,11 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(13px,3vw,22px);backdrop-filter:blur(6px);
 }
+.mintbox > *, .console > *{min-width:0}
 .mint-grid{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px;align-items:start}
+/* Длинный hex песни в specs — без пробелов: без min-width:0 грид-элемент
+   распирает колонку шире экрана, и вместе с ним уезжает и картинка. */
+.mint-grid > *, .mint-side{min-width:0;max-width:100%}
 /* Благодарность за минт: единственное место, где страница говорит от имени
    пушистиков. Появляется только после подтверждённой карточки. */
 .thanks{
@@ -412,8 +427,8 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .thanks a{color:var(--accent)}
 @keyframes thanksIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ .thanks{animation:none} }
-.card-hold{border-radius:16px;overflow:hidden;box-shadow:0 10px 28px var(--shadow);line-height:0}
-.card-hold svg{width:100%;height:auto;display:block}
+.card-hold{border-radius:16px;overflow:hidden;box-shadow:0 10px 28px var(--shadow);line-height:0;min-width:0;max-width:100%}
+.card-hold svg{width:100%;max-width:100%;height:auto;display:block}
 .specs{
   margin:0 0 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;font-variant-numeric:tabular-nums;
@@ -422,7 +437,7 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .specs dd{margin:0;overflow-wrap:anywhere}
 .specs dd b{color:var(--accent);font-weight:700}
 .meta{
-  margin:12px 0 0;max-height:260px;overflow:auto;
+  margin:12px 0 0;max-height:260px;max-width:100%;overflow:auto;
   background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:12px;
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;line-height:1.5;
   white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);
@@ -448,13 +463,14 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;
   letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
 }
-.gg-trait-value{font-weight:800;font-size:13.5px}
+.gg-trait-value{font-weight:800;font-size:13.5px;overflow-wrap:anywhere}
 .gg-trait.rare{background:color-mix(in srgb, var(--accent) 14%, var(--ground));border-color:var(--accent)}
 .gg-trait.rare .gg-trait-type{color:var(--accent)}
 .gg-trait.rare .gg-trait-value{color:var(--accent)}
 
 /* ---------- карточки ---------- */
 .dossier{margin-top:24px;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.dossier > *{min-width:0}
 .card{
   display:flex;flex-direction:column;gap:5px;padding:14px 16px;border-radius:16px;
   background:var(--card);border:1px solid var(--line);border-left:5px solid var(--cc);
@@ -545,7 +561,7 @@ kbd{
           <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Проиграть карточку</button>
           <button class="btn ghost" id="metaBtn" type="button" aria-expanded="false">Показать метаданные</button>
         </div>
-        <p class="note" id="mintNote">Чеканит контракт, а не мы: единственная трата на всём сайте.</p>
+        <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
         <div class="thanks" id="thanks" hidden>
           <p class="thanks-word">спасибо!</p>
           <p class="thanks-said">Пушистики кланяются и убегают петь дальше.</p>
@@ -556,7 +572,7 @@ kbd{
     </div>
 
     <div class="gg-preview">
-      <p class="gg-eyebrow">Так это увидят на Getgems</p>
+      <p class="gg-eyebrow">Предпросмотр описания и атрибутов</p>
       <div id="ggOut"></div>
     </div>
   </section>
@@ -922,7 +938,7 @@ function seedTape(){
    MAX_GAP — потолок сырой паузы, 3 секунды, а не полторы, как было. От
    мёртвой тишины при проигрывании защищают не миллисекунды, а потолок
    q = 15: пауза не может быть длиннее 15/16 такта. А вот полторы секунды
-   означали, что медленнее 86 ударов в минуту пауза не дотягивает до 8/16
+   означали, что медленнее 86 ударов в минуту пауза не дотягивает до 5/16
    и НЕ ЗАСЧИТЫВАЕТСЯ ВООБЩЕ — у спокойного игрока признак «пауз» всегда
    оставался нулём, и звёзд на карточке всегда был минимум.
 
@@ -930,7 +946,7 @@ function seedTape(){
    в ленте и прокручивается.
 
    А что именно считать паузой, здесь не решается вовсе: это REST_Q из
-   эталонного блока, полутакт, и то же самое спросит контракт. */
+   эталонного блока, 5/16, и то же самое спросит контракт. */
 var MIN_GAP = 75, MAX_GAP = 3000, TAPE_MAX = 240;
 var lastAt = 0;
 
@@ -938,7 +954,7 @@ var lastAt = 0;
    те же, которыми песня превращается в байты, — и по тем же слогам, что
    уйдут в карточку. Поэтому число в ленте, число на карточке и признак
    «Пауз» в метаданных — всегда одно и то же число.
-   Паузу видно там же, где её увидит контракт: с полутакта, а не с круглых
+    Паузу видно там же, где её увидит контракт: с 5/16, а не с круглых
    «четырёхсот с чем-то миллисекунд». Пока темп плавает, полоски тишины
    появляются и исчезают — это честно: темп в песне тоже ещё не устоялся. */
 function updateInfo(){
@@ -965,7 +981,7 @@ function updateInfo(){
 }
 
 /* Полоски тишины по мерке шестнадцатой: пауза видна ровно там, где её
-   увидит контракт, — с REST_Q, полутакта. Мерку передают снаружи, потому
+   увидит контракт, — с REST_Q, 5/16. Мерку передают снаружи, потому
    что она разная: у наигранной ленты темп считается из её же пауз, а у
    чужой песни, пришедшей по ссылке, он записан в байтах — и пересчитывать
    его заново значило бы показать не те паузы, что у карточки в трейте. */
@@ -1161,6 +1177,11 @@ function playTape(){
   playing = true;
   playBtn.textContent = "Стоп";
   playBtn.classList.add("live");
+  /* Проигрывание общее, а кнопки две: вторую переводим в то же состояние,
+     иначе нажатие на неё во время чужого проигрывания молча останавливает
+     (ветка if(playing) выше) и «Стоп» не показывает никогда. */
+  var cp = document.getElementById("cardPlayBtn");
+  if(cp){ cp.textContent = "Стоп"; cp.classList.add("live"); }
 
   items.forEach(function(it){
     if(it.rest){
@@ -1238,7 +1259,7 @@ var MAX_NOTES = 118;
    не для красоты: по ним считает и карточка, и лента под квартетом, и
    признак «Пауз». Второго набора не существует — иначе лента обещала бы
    один темп и одни паузы, а на чейне оказались бы другие. */
-var REST_Q = 8;                           /* пауза засчитывается с полутакта, 8/16 */
+var REST_Q = 5;                           /* пауза засчитывается с 5/16, 2.5× медианы */
 
 function tempoOf(gaps){                   /* медианная пауза принимается за восьмую */
   var bpm = 140;
@@ -1567,12 +1588,15 @@ function renderCard(song, hex, tokenId, tr){
   }
 
   /* Имя — четырьмя цветами, по слогу на каждого, в том же порядке, в каком
-     они поют. Не перелив: у слогов есть хозяева, и у каждого свой цвет. */
+     они поют. Не перелив: у слогов есть хозяева, и у каждого свой цвет.
+     Днём светлые цвета тел тонут в светлом небе (ТИ давало контраст 1.06) —
+     там берём тёмные цвета букв, те же, что в логотипе сайта. */
+  var tc = tr.sky === 2 ? "d" : "c";
   o.push(label(500, 148,
-    '<tspan fill="' + SKIN[0].c + '">ТИ</tspan>' +
-    '<tspan fill="' + SKIN[1].c + '">ТУ</tspan>' +
-    '<tspan fill="' + SKIN[2].c + '">ТА</tspan>' +
-    '<tspan fill="' + SKIN[3].c + '">ТОН</tspan>',
+    '<tspan fill="' + SKIN[0][tc] + '">ТИ</tspan>' +
+    '<tspan fill="' + SKIN[1][tc] + '">ТУ</tspan>' +
+    '<tspan fill="' + SKIN[2][tc] + '">ТА</tspan>' +
+    '<tspan fill="' + SKIN[3][tc] + '">ТОН</tspan>',
     62, INK, "middle", FACE, 8));
   o.push(label(500, 192, tr.subtitle, 21, DIM, "middle", MONO, 1));
   o.push('<path d="M330 222H670" stroke="' + LINE + '" stroke-width="2"/>');
@@ -1649,7 +1673,7 @@ var BASS = ["до₅", "до₄", "до₃"];
 
 function attrsOf(song, tr){
   var a = [
-    { trait_type:"Доминирует", value:NAMES[tr.dom] },
+    { trait_type:"Лид-вокал", value:NAMES[tr.dom] },
     { trait_type:"Нот", value:song.n },
     { trait_type:"Темп", value:song.bpm },
     { trait_type:"Грув", value:song.groove },
@@ -1683,7 +1707,7 @@ function quartetWord(counts){
   return "Соло";
 }
 
-function describeOf(song, tr){
+function describeOf(song, tr, hex, num){
   var s = DAYPART[tr.sky] + " песня в " + song.n + " " +
     plural(song.n, "слог", "слога", "слогов") + ", " + song.bpm + " " +
     plural(song.bpm, "удар", "удара", "ударов") + " в минуту. Чаще всех выводит " +
@@ -1709,7 +1733,23 @@ function describeOf(song, tr){
   /* Приметы не пересказываем текстом: они уезжают в attributes через uri
      (полуцепочечная раскладка), и повторять список в описании второй раз
      незачем — оба места считают их из одних tr. */
+
+  /* А ссылки на проигрыватель — обе, .ton своим и GitHub Pages остальным:
+     описание карточки и есть самый короткий путь от NFT к песне. hex и
+     номер приходят снаружи: в декодированной песне их нет, а без номера
+     (черновик) играть пока нечего — тогда ссылок просто нет. */
+  if(hex && num) s += playLinks(hex, num);
   return s;
+}
+
+/* Куда играть карточку. Тот же #s=<hex>&n=<номер>, что кладёт в кнопки
+   контракт, — байты песни прямо в адресе, без единого обращения к сети. */
+var PLAY_TON = "https://tituta.ton/";
+var PLAY_WEB = "https://titutaton.github.io/";
+
+function playLinks(hex, num){
+  return " Сыграть: " + PLAY_TON + "#s=" + hex + "&n=" + num +
+    ", запасная — " + PLAY_WEB + "#s=" + hex + "&n=" + num + ".";
 }
 
 /* ---- сообщение минта ----
@@ -1854,7 +1894,7 @@ function showCard(c){
    JSON-виде ниже, и в предпросмотре «как на Getgems» рядом с карточкой. */
 function nftName(c){ return "Титутатон #" + (c.tokenId || "—"); }
 function nftDescription(c){
-  return "Песня квартета мохоседов: " + describeOf(c.song, c.tr) +
+  return "Песня квартета мохоседов: " + describeOf(c.song, c.tr, toHexBytes(c.bytes), c.tokenId || 0) +
     " Картинка выведена из байтов песни прямо на чейне: тот же хеш — та же " +
     "картинка. По ленте внизу карточку можно сыграть.";
 }
@@ -1934,8 +1974,7 @@ var minting = false;
 
 function say(text){ mintNote.textContent = text; }
 
-say("Чеканит контракт, а не мы: " + PRICE + (IS_TESTNET ? " в тестовой сети" : "") +
-    " — единственная трата на всём сайте.");
+say("Точную сумму покажет кошелёк.");
 
 /* Кошелёк и настройки лежат в соседних файлах. Если страницу открыли так,
    что соседи не подгрузились — двойным щелчком из папки или из чужого
@@ -2058,6 +2097,8 @@ function playFromBytes(bytes){
   if(!song) return;
   audio();
   playing = true;
+  playBtn.textContent = "Стоп";
+  playBtn.classList.add("live");
   cardPlayBtn.textContent = "Стоп";
   cardPlayBtn.classList.add("live");
 
@@ -2095,8 +2136,10 @@ metaBtn.addEventListener("click", function(){
 
    Кочка выпуклая, значит под каждым зверем своя высота. Считать её на глаз —
    тот самый случай, когда потом всю жизнь двигаешь пиксели: спрашиваем у
-   самой фигуры, где у неё верх под этим зверем, и опускаем каждого ровно
-   настолько, чтобы тень легла на землю. */
+   самой фигуры, где у неё верх под каждой лапкой, и опускаем каждого ровно
+   настолько, чтобы обе лапки встали на землю. Кочка всегда уходит за пульт:
+   низ её опущен на 70px под поляну, поэтому зазора между зеленью и лентой
+   нет ни на какой ширине. */
 (function(){
   var rnd = prngFrom(sha256(new TextEncoder().encode("кочка Титутатона")));
   var mEl = document.getElementById("mound");
@@ -2132,40 +2175,59 @@ metaBtn.addEventListener("click", function(){
       return;
     }
     var grounds = seats.map(function(s){
-      var sv = s.querySelector("svg"), el = sv && sv.querySelector("ellipse");
-      if(!el) return null;
-      var r = sv.getBoundingClientRect(), bb = el.getBBox();
-      var shadow = r.top + (bb.y + bb.height) * (r.height / 200);
-      var ground = groundTop(r.left + r.width / 2, box);
-      if(ground !== null) s.style.marginBottom = Math.round(shadow - ground) + "px";
-      return ground;
+      /* Посадка — по лапкам, а не по тени: тень — это краска под зверем,
+         а стоят они на двух лапках (.foot). Меряем низ каждой лапки и землю
+         ровно под ней, берём худший сдвиг — тогда обе лапки на кочке:
+         нижняя касается, вторая висит выше не больше чем на пару пикселей
+         кривизны холма, а не тонет в нём. Нижнее положение — покой
+         (без класса singing): вверх bob подпрыгивает сам, вниз при пении
+         вдавливается — это живое, а не парение. */
+      var sv = s.querySelector("svg");
+      if(!sv) return null;
+      var feet = sv.querySelectorAll(".foot");
+      if(!feet || !feet.length) return null;
+      var r = sv.getBoundingClientRect(), ky = r.height / 200, kx = r.width / 200;
+      var need = -Infinity, gMax = null;
+      for(var fi = 0; fi < feet.length; fi++){
+        var bb = feet[fi].getBBox();
+        var footBottom = r.top + (bb.y + bb.height) * ky;
+        var footCx = r.left + (bb.x + bb.width / 2) * kx;
+        var g = groundTop(footCx, box);
+        if(g === null) continue;
+        if(gMax === null || g > gMax) gMax = g;
+        var shift = footBottom - g;
+        if(shift > need) need = shift;
+      }
+      if(need === -Infinity || gMax === null) return null;
+      s.style.marginBottom = Math.round(need) + "px";
+      return gMax;
     });
 
-    /* Ряд точек — сразу под подошвой СВОЕГО же зверя, той самой точкой
-       ground, что уже посадила его тень на кочку. Раньше ряды тянули на
-       одну общую линию (чтобы не шли волной) — но общая линия годится
-       только зверю с самым низким ground, у остальных либо вминалась в
-       подпись, либо торчала из-под кочки: то самое дёрганье и разрезание.
-       Своя линия у каждого — волна вместо гонки за чужой высотой.
-
-       Но ground — это где трава на глаз, а не где кончается подпись: на
-       широких экранах кочка выше и ground у неё оказывается ВЫШЕ имени
-       зверя, а не ниже. Без страховки ряд прыгал вверх, в буквы слога.
-       Поэтому цель — не просто ground+отступ, а самая нижняя из двух
-       точек: либо под подошвой, либо под собственной подписью, что бы
-       ни было ниже на экране. */
+    /* Цифры нот — на одной общей строке у всех четырёх: сначала считаем,
+       где каждая МОЖЕТ встать (не выше своей подписи и не выше кочки+14),
+       потом берём самую нижнюю из четырёх и ставим всех на неё.
+       Волны больше нет: строка одна, тексты и зверята друг на друга не лезут,
+       а запас до пульта считается от общего низа. */
     glade.style.marginBottom = "0px";
     var maxRowBottom = -Infinity;
-    seats.forEach(function(s, i){
+    var tops = seats.map(function(s, i){
       var row = s.querySelector(".octaves"), tag = s.querySelector(".tag");
-      if(!row || grounds[i] === null) return;
+      if(!row || grounds[i] === null) return null;
       row.style.top = "0px";
       var naturalTop = row.getBoundingClientRect().top;
       var minTop = tag ? tag.getBoundingClientRect().bottom + 2 : naturalTop;
-      var target = Math.max(grounds[i] + 14, minTop);
-      row.style.top = Math.round(target - naturalTop) + "px";
-      maxRowBottom = Math.max(maxRowBottom, target + row.offsetHeight);
+      var cand = Math.max(grounds[i] + 14, minTop);
+      return { row:row, naturalTop:naturalTop, cand:cand };
     });
+    var common = -Infinity;
+    tops.forEach(function(t){ if(t && t.cand > common) common = t.cand; });
+    var rowH = 0;
+    tops.forEach(function(t){
+      if(!t) return;
+      t.row.style.top = Math.round(common - t.naturalTop) + "px";
+      if(t.row.offsetHeight > rowH) rowH = t.row.offsetHeight;
+    });
+    if(common > -Infinity) maxRowBottom = common + rowH;
     /* Пульт нарочно заходит на кочку (см. margin-top у .console) — при
        margin-bottom:0 у поляны его верх уже известен, меряем его прямо
        у самого пульта, а не выводим формулой через низ кочки: формула
