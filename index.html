@@ -263,7 +263,7 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 
 /* ---------- пульт ---------- */
 .console{
-  margin-top:4px;display:grid;gap:14px;
+  position:relative;z-index:1;margin-top:-24px;display:grid;gap:14px;
   background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(13px,3vw,22px);
   backdrop-filter:blur(6px);
@@ -2100,6 +2100,7 @@ metaBtn.addEventListener("click", function(){
 (function(){
   var rnd = prngFrom(sha256(new TextEncoder().encode("кочка Титутатона")));
   var mEl = document.getElementById("mound");
+  var console_ = document.querySelector(".console");   /* не "console" — так звалась бы глобальная консоль браузера */
   mEl.innerHTML =
     '<svg viewBox="0 0 1000 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
       '<path d="' + fluffI(500, 250, 640, 210, 8, 45, rnd) + '" fill="var(--mound)"/>' +
@@ -2153,6 +2154,8 @@ metaBtn.addEventListener("click", function(){
        Поэтому цель — не просто ground+отступ, а самая нижняя из двух
        точек: либо под подошвой, либо под собственной подписью, что бы
        ни было ниже на экране. */
+    glade.style.marginBottom = "0px";
+    var maxRowBottom = -Infinity;
     seats.forEach(function(s, i){
       var row = s.querySelector(".octaves"), tag = s.querySelector(".tag");
       if(!row || grounds[i] === null) return;
@@ -2161,13 +2164,15 @@ metaBtn.addEventListener("click", function(){
       var minTop = tag ? tag.getBoundingClientRect().bottom + 2 : naturalTop;
       var target = Math.max(grounds[i] + 14, minTop);
       row.style.top = Math.round(target - naturalTop) + "px";
+      maxRowBottom = Math.max(maxRowBottom, target + row.offsetHeight);
     });
-    /* Самый нижний зверь может висеть и ниже поляны — тогда поляне нужен
-       запас снизу, иначе он лягут на пульт. Запас именно внешним
-       отступом: кочка живёт внутри поляны, снаружи её ничем не сдвинуть,
-       а значит и посадка от этого не поедет. */
-    var lowest = Math.min.apply(null, seats.map(function(s){ return parseFloat(s.style.marginBottom) || 0; }));
-    glade.style.marginBottom = Math.max(0, -lowest) + "px";
+    /* Пульт нарочно заходит на кочку (см. margin-top у .console) — при
+       margin-bottom:0 у поляны его верх уже известен, меряем его прямо
+       у самого пульта, а не выводим формулой через низ кочки: формула
+       была нам не по зубам — верх пульта зависит не только от кочки,
+       но и от высоты всей сетки со зверями, а это уже другой расчёт. */
+    var need = maxRowBottom + 4 - console_.getBoundingClientRect().top;
+    glade.style.marginBottom = Math.max(0, need) + "px";
   }
 
   function seatTwice(){ seat(30); seat(30); }   /* второй проход: посадка двигает и саму кочку */
