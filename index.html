@@ -2130,43 +2130,30 @@ metaBtn.addEventListener("click", function(){
       if(tries > 0) requestAnimationFrame(function(){ seat(tries - 1); });
       return;
     }
-    seats.forEach(function(s){
+    var grounds = seats.map(function(s){
       var sv = s.querySelector("svg"), el = sv && sv.querySelector("ellipse");
-      if(!el) return;
+      if(!el) return null;
       var r = sv.getBoundingClientRect(), bb = el.getBBox();
       var shadow = r.top + (bb.y + bb.height) * (r.height / 200);
       var ground = groundTop(r.left + r.width / 2, box);
       if(ground !== null) s.style.marginBottom = Math.round(shadow - ground) + "px";
+      return ground;
     });
 
-    /* Ряды точек живут в колонках своих зверей, а звери сидят на выпуклой
-       кочке — у каждого своя высота, и точки шли бы волной. Раньше их
-       выравнивали друг под друга — под ту же линию, где естественно
-       оказался самый нижний ряд. Но эта линия сама зависела от посадки
-       (margin-bottom), а значит и от кривизны кочки под каждым зверем —
-       и на части ширин уезжала ниже плоского низа кочки целиком: ряд
-       наполовину висел в темноте под травой. Сейчас линия не гуляет —
-       это фиксированный отступ от низа кочки (он один и тот же везде,
-       кочка прямоугольная снизу), точки всегда внутри травы. */
-    seats.forEach(function(s){
-      var row = s.querySelector(".octaves"), tag = s.querySelector(".tag");
-      if(!row) return;
+    /* Ряд точек — сразу под подошвой СВОЕГО же зверя, той самой точкой
+       ground, что уже посадила его тень на кочку. Раньше ряды тянули на
+       одну общую линию (чтобы не шли волной) — но общая линия годится
+       только зверю с самым низким ground, у остальных либо вминалась в
+       подпись, либо торчала из-под кочки: то самое дёрганье и разрезание.
+       Своя линия у каждого — волна вместо гонки за чужой высотой, зато
+       без вычислений, которые могут не сойтись: ground для тени и так
+       всегда внутри травы, эта же точка плюс небольшой отступ вниз. */
+    seats.forEach(function(s, i){
+      var row = s.querySelector(".octaves");
+      if(!row || grounds[i] === null) return;
       row.style.top = "0px";
       var naturalTop = row.getBoundingClientRect().top;
-      /* Цель — линия по НИЗУ ряда (не по верху: ряд сам высотой с кружки,
-         и отступ, отмеренный от верха, оставлял кружки торчать из-под
-         кочки на собственную высоту ряда). Но не выше подписи над собой:
-         если у этого зверя ряд и так начинается ниже цели, дальше вниз
-         тянуть некуда, а вверх — вдавится в имя. */
-      /* box измерен в начале прохода — свежее mEl.getBoundingClientRect()
-         тут же, а не box.bottom: сама посадка (align-items:end + большие
-         отрицательные margin-bottom у зверей) может подвинуть кочку
-         внутри поляны за время этого же прохода, и старое значение box
-         к этой строчке уже устаревает. */
-      var groundLine = mEl.getBoundingClientRect().bottom - 4 - row.offsetHeight;
-      var minTop = tag ? tag.getBoundingClientRect().bottom : naturalTop;
-      var target = Math.max(groundLine, minTop);
-      row.style.top = Math.round(target - naturalTop) + "px";
+      row.style.top = Math.round(grounds[i] + 14 - naturalTop) + "px";
     });
     /* Самый нижний зверь может висеть и ниже поляны — тогда поляне нужен
        запас снизу, иначе он лягут на пульт. Запас именно внешним
