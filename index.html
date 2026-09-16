@@ -2140,20 +2140,39 @@ metaBtn.addEventListener("click", function(){
     });
 
     /* Ряды точек живут в колонках своих зверей, а звери сидят на выпуклой
-       кочке — у каждого своя высота, и точки шли бы волной. Ставим их на
-       общую линию: на ту, где и так оказался самый нижний ряд. Только вниз
-       и не ниже — поднятый ряд вдавился бы в подпись своего же зверя, а
-       опущенный ниже всех вылез бы из поляны на пульт. */
-    var lift = seats.map(function(s){ return parseFloat(s.style.marginBottom) || 0; });
-    var lowest = Math.min.apply(null, lift);
-    seats.forEach(function(s, i){
-      var row = s.querySelector(".octaves");
-      if(row) row.style.top = (lift[i] - lowest) + "px";
+       кочке — у каждого своя высота, и точки шли бы волной. Раньше их
+       выравнивали друг под друга — под ту же линию, где естественно
+       оказался самый нижний ряд. Но эта линия сама зависела от посадки
+       (margin-bottom), а значит и от кривизны кочки под каждым зверем —
+       и на части ширин уезжала ниже плоского низа кочки целиком: ряд
+       наполовину висел в темноте под травой. Сейчас линия не гуляет —
+       это фиксированный отступ от низа кочки (он один и тот же везде,
+       кочка прямоугольная снизу), точки всегда внутри травы. */
+    seats.forEach(function(s){
+      var row = s.querySelector(".octaves"), tag = s.querySelector(".tag");
+      if(!row) return;
+      row.style.top = "0px";
+      var naturalTop = row.getBoundingClientRect().top;
+      /* Цель — линия по НИЗУ ряда (не по верху: ряд сам высотой с кружки,
+         и отступ, отмеренный от верха, оставлял кружки торчать из-под
+         кочки на собственную высоту ряда). Но не выше подписи над собой:
+         если у этого зверя ряд и так начинается ниже цели, дальше вниз
+         тянуть некуда, а вверх — вдавится в имя. */
+      /* box измерен в начале прохода — свежее mEl.getBoundingClientRect()
+         тут же, а не box.bottom: сама посадка (align-items:end + большие
+         отрицательные margin-bottom у зверей) может подвинуть кочку
+         внутри поляны за время этого же прохода, и старое значение box
+         к этой строчке уже устаревает. */
+      var groundLine = mEl.getBoundingClientRect().bottom - 4 - row.offsetHeight;
+      var minTop = tag ? tag.getBoundingClientRect().bottom : naturalTop;
+      var target = Math.max(groundLine, minTop);
+      row.style.top = Math.round(target - naturalTop) + "px";
     });
-    /* Самый нижний ряд может висеть и ниже поляны — тогда поляне нужен
-       запас снизу, иначе точки лягут на пульт. Запас именно внешним
+    /* Самый нижний зверь может висеть и ниже поляны — тогда поляне нужен
+       запас снизу, иначе он лягут на пульт. Запас именно внешним
        отступом: кочка живёт внутри поляны, снаружи её ничем не сдвинуть,
        а значит и посадка от этого не поедет. */
+    var lowest = Math.min.apply(null, seats.map(function(s){ return parseFloat(s.style.marginBottom) || 0; }));
     glade.style.marginBottom = Math.max(0, -lowest) + "px";
   }
 
@@ -2161,10 +2180,23 @@ metaBtn.addEventListener("click", function(){
 
   seatTwice();
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(seatTwice);
-  var resizeTimer = 0;
+  /* Кочка — чистый CSS (clamp по vw) и меняется мгновенно на каждый кадр
+     растягивания окна. Посадка же (margin-bottom) требует hit-testing и
+     раньше ждала 120мс тишины после resize — всё это время звери сидели
+     там, где кочка была ДО начала растягивания, а не там, где она сейчас,
+     и в момент пересчёта прыгали. rAF-троттлинг держит посадку на той же
+     частоте, что и сама кочка, — рассинхрона почти не остаётся. Плюс
+     короткий контрольный пересчёт после тишины — если кадры анимации
+     во время растягивания слились (свёрнутая вкладка, слабое железо),
+     последнее слово всё равно останется за точным пересчётом, а не за
+     тем, что успело долететь до экрана. */
+  var resizePending = false, settleTimer = 0;
   addEventListener("resize", function(){
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(seatTwice, 120);
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(seatTwice, 100);
+    if(resizePending) return;
+    resizePending = true;
+    requestAnimationFrame(function(){ resizePending = false; seatTwice(); });
   });
 })();
 
