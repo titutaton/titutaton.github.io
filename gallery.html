@@ -355,28 +355,6 @@ function nodeOf(c){
     body.appendChild(f);
   }
 
-  var actions = document.createElement("div");
-  actions.className = "actions";
-
-  /* Слушать — режим наслаждения: та же карточка, но большая и без чеканки.
-     Песня подтягивается главной сама по #nft=, лишних запросов здесь нет. */
-  var l = document.createElement("a");
-  l.className = "go";
-  l.href = "index.html#nft=" + c.address + "&enjoy=1";
-  l.textContent = "Слушать";
-  actions.appendChild(l);
-
-  /* Миксовать — та же песня ложится в ленту на главной черновиком, и с ней
-     уже можно работать: менять, дописывать, отчеканить свою. Просто #nft=
-     без enjoy: главная показывает всю площадку, а не просмотр. */
-  var a = document.createElement("a");
-  a.className = "go";
-  a.href = "index.html#nft=" + c.address;
-  a.textContent = "Миксовать";
-  actions.appendChild(a);
-
-  body.appendChild(actions);
-
   el.appendChild(body);
   return el;
 }
