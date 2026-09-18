@@ -336,6 +336,18 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   text-decoration:none;padding:7px 10px;border-radius:999px;
 }
 .navlink:hover{color:var(--ink)}
+/* Звук — маленькой кнопкой-значком в шапке: настройка редкая, в ленте ей
+   не место. Значок меняется на перечёркнутый, когда звук выключен. */
+.sound{
+  appearance:none;border:0;background:none;color:var(--ink-soft);cursor:pointer;
+  width:34px;height:34px;border-radius:999px;flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.sound:hover{color:var(--ink)}
+.sound:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sound .off-mark{display:none}
+.sound.off .wave{display:none}
+.sound.off .off-mark{display:block}
 .wallet{
   appearance:none;font:inherit;cursor:pointer;font-weight:800;font-size:13px;
   color:var(--accent);background:none;border:2px solid var(--accent);
@@ -744,6 +756,14 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
       <a class="navlink" href="#view=main">Зверята</a>
       <a class="navlink" href="#view=gallery">Галерея</a>
       <a class="navlink" href="#view=gallery&mine=1">Мои</a>
+      <button class="sound" id="mute" type="button" aria-pressed="false" aria-label="Звук включён" title="Звук включён">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9v6h3l5 4V5L7 9H4z" fill="currentColor" stroke="none"/>
+          <path class="wave" d="M16.5 8.5a4.5 4.5 0 0 1 0 7"/>
+          <path class="wave" d="M19 6a8 8 0 0 1 0 12"/>
+          <path class="off-mark" d="M5 5l14 14"/>
+        </svg>
+      </button>
       <button class="wallet" id="walletBtn" type="button">Подключить кошелёк</button>
     </div>
   </nav>
@@ -767,7 +787,6 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
     <div class="tape" id="tape" aria-live="polite" aria-label="Сыгранные ноты"></div>
     <div class="controls">
       <button class="btn" id="play" type="button">Проиграть ленту</button>
-      <button class="btn ghost" id="mute" type="button" aria-pressed="false">Звук: включён</button>
       <button class="btn ghost" id="clear" type="button">Очистить ленту</button>
       <button class="btn ghost" id="toCard" type="button">К карточке</button>
     </div>
@@ -1721,8 +1740,10 @@ document.getElementById("toCard").addEventListener("click", function(){
 var muteBtn = document.getElementById("mute");
 muteBtn.addEventListener("click", function(){
   muted = !muted;
-  muteBtn.textContent = muted ? "Звук: выключен" : "Звук: включён";
-  muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+  muteBtn.classList.toggle("off", muted);
+  muteBtn.setAttribute("aria-pressed", String(muted));
+  muteBtn.setAttribute("aria-label", muted ? "Звук выключен" : "Звук включён");
+  muteBtn.title = muted ? "Звук выключен" : "Звук включён";
   if(master) master.gain.value = muted ? 0 : .26;
 });
 
