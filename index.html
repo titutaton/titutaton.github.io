@@ -715,6 +715,20 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
   margin:14px 0 0;text-align:center;color:var(--ink-soft);
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;
 }
+/* Подсказка для тех, кто пришёл по кнопке из карточки NFT: глубокий переход
+   на конкретную песню статический сайт сделать не может, поэтому прямо
+   говорим, что делать. */
+#viewGallery .gnotice{
+  position:relative;margin:14px 0 0;padding:12px 40px 12px 16px;border-radius:14px;
+  background:var(--ground-2);border:1px solid var(--line);color:var(--ink-soft);font-size:13.5px;
+}
+#viewGallery .gnotice[hidden]{display:none}
+#viewGallery .gnotice p{margin:0}
+#viewGallery .gnotice-x{
+  position:absolute;top:6px;right:8px;appearance:none;border:0;background:none;color:var(--ink-soft);
+  font:inherit;font-size:20px;line-height:1;cursor:pointer;padding:2px 8px;border-radius:999px;
+}
+#viewGallery .gnotice-x:hover{color:var(--ink)}
 #viewGallery .grid{margin:18px 0 0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
 #viewGallery .gcard{
   background:var(--card);border:1px solid var(--line);border-radius:20px;
@@ -830,6 +844,10 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
     <div class="bar">
       <input class="find" id="find" type="search" placeholder="Номер, редкость или зверь — например, 12 или зеркальная" aria-label="Поиск по карточкам">
       <button class="reload" id="refresh" type="button" title="Перечитать коллекцию с чейна">Обновить</button>
+    </div>
+    <div class="gnotice" id="gNotice" hidden>
+      <p>Точный переход на вашу песню невозможен: сайт полностью статический. Пожалуйста, запомните номер карточки на Getgems и введите его в поиск.</p>
+      <button class="gnotice-x" id="gNoticeX" type="button" aria-label="Скрыть">×</button>
     </div>
     <p class="state" id="state">спрашиваем у чейна…</p>
     <div class="grid" id="grid"></div>
@@ -2983,9 +3001,11 @@ function route(){
     showView("gallery");
     if(window.TTN_GALLERY){
       var qm = /[#&]q=([^&]*)/.exec(hash);
+      var fm = /[#&]from=([^&]*)/.exec(hash);
       window.TTN_GALLERY.route({
         mine: /[#&]mine=1\b/.test(hash),
-        q: qm ? decodeURIComponent(qm[1].replace(/\+/g, " ")) : null
+        q: qm ? decodeURIComponent(qm[1].replace(/\+/g, " ")) : null,
+        from: fm ? fm[1] : null
       });
     }
     return;
@@ -3039,10 +3059,20 @@ var more = document.getElementById("more");
 var foot = document.getElementById("foot");
 var find = document.getElementById("find");
 var refresh = document.getElementById("refresh");
+var gNotice = document.getElementById("gNotice");
+var gNoticeX = document.getElementById("gNoticeX");
 
 var mode = "all";
 var cards = [], total = 0, taken = 0, busy = false, done = false;
 var started = false;
+/* Подсказку «запомните номер» показываем один раз; закрытие запоминаем. */
+var g2gOff = false;
+try{ g2gOff = localStorage.getItem("ttn:g2g") === "1"; }catch(e){}
+if(gNoticeX) gNoticeX.addEventListener("click", function(){
+  g2gOff = true;
+  if(gNotice) gNotice.hidden = true;
+  try{ localStorage.setItem("ttn:g2g", "1"); }catch(e){}
+});
 
 /* Кэш на время визита: у «Все» и «Мои» свои списки, и переключение вкладок
    в SPA вообще не должно ходить в сеть. В хранилище ничего не кладём. */
@@ -3290,6 +3320,16 @@ function galRoute(p){
   if(want !== mode) switchTo(want);
   else if(cards.length || !COLLECTION) redraw();
   else if(!busy && COLLECTION) loadMore();
+  /* Пришли по кнопке из карточки NFT — говорим прямо, что точный переход
+     статический сайт сделать не может, и что искать по номеру. */
+  if(gNotice){
+    if(p && p.from === "g2g" && !g2gOff){
+      gNotice.hidden = false;
+      if(window.matchMedia && matchMedia("(min-width:761px)").matches) find.focus();
+    } else {
+      gNotice.hidden = true;
+    }
+  }
 }
 window.TTN_GALLERY = { route: galRoute };
 
