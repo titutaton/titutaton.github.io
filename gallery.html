@@ -264,6 +264,24 @@ var mode = /[?&]mine\b/.test(location.search) ? "mine" : "all";
 var qFromUrl = /[?&]q=([^&]*)/.exec(location.search);
 var cards = [], total = 0, taken = 0, busy = false, done = false;
 
+/* Кэш на время визита: у «Все» и «Мои» свои списки, и переключение вкладок
+   не должно ходить в tonapi заново. В хранилище ничего не кладём — картинки
+   в data:URL слишком тяжёлые для localStorage; обнуляется кнопкой «Обновить»
+   и при смене кошелька. */
+var cache = { all: null, mine: null };
+function saveCache(){
+  cache[mode] = { cards: cards.slice(), total: total, taken: taken, done: done };
+}
+function restoreCache(to){
+  var s = cache[to];
+  if(!s) return false;
+  cards = s.cards.slice();
+  total = s.total;
+  taken = s.taken;
+  done = s.done;
+  return true;
+}
+
 function say(s){ state.textContent = s; }
 
 /* ---------- разбор того, что отдал индексатор ---------- */
@@ -411,6 +429,7 @@ function loadAll(){
         done = list.length < take || taken >= total;
         more.hidden = done;
         redraw();
+        saveCache();
       });
   });
 }
@@ -434,8 +453,10 @@ function loadMine(){
       cards = (j.nft_items || []).slice()
         .sort(function(a, b){ return (b.index || 0) - (a.index || 0); })
         .map(cardOf);
+      done = true;
       more.hidden = true;
       redraw();
+      saveCache();
     });
 }
 
@@ -453,6 +474,8 @@ function loadMore(){
    иначе новая карточка появится только на следующем визите. */
 function reloadAll(){
   if(busy) return;
+  cache.all = null;
+  cache.mine = null;
   total = 0;
   cards = [];
   taken = 0;
@@ -466,13 +489,22 @@ function reloadAll(){
 
 function switchTo(to){
   if(mode === to) return;
+  /* В кэш ничего не пишем здесь: он наполняется только после успешного
+     чтения (иначе «Мои» без кошелька сохранились бы пустым списком и
+     перекрыли бы подсказку подключиться). */
   mode = to;
   tabAll.setAttribute("aria-selected", String(to === "all"));
   tabMine.setAttribute("aria-selected", String(to === "mine"));
+  grid.textContent = "";
+  if(restoreCache(to)){                /* уже читали — из памяти, без сети */
+    redraw();
+    more.hidden = (to === "mine") || done;
+    return;
+  }
   cards = [];
+  total = 0;
   taken = 0;
   done = false;
-  grid.textContent = "";
   more.hidden = true;
   loadMore();
 }
@@ -493,8 +525,9 @@ if(!window.Wallet){
 }
 if(window.Wallet) window.Wallet.bind(walletBtn);
 if(window.Wallet) window.Wallet.on(function(account){
-  /* Подключился кошелёк, а мы смотрим «мои» — покажем их сразу */
+  /* Подключился/сменился кошелёк, а мы смотрим «мои» — список устарел */
   if(mode !== "mine") return;
+  cache.mine = null;
   cards = [];
   grid.textContent = "";
   if(account) loadMore(); else redraw();
