@@ -376,6 +376,26 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   transition:background .2s ease;
 }
 .rest.now{background:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 7px)}
+/* Мини-редактор ленты: клик по ноте или паузе открывает карточку правки.
+   Править можно длительность паузы и само наличие ноты/паузы — то, что
+   вообще выражено в байтах песни. Ноту как таковую тут не переучиваем. */
+.chip.can-edit,.rest.can-edit{cursor:pointer}
+.chip.can-edit:hover,.rest.can-edit:hover{outline:2px solid var(--accent);outline-offset:1px}
+.tape-edit{
+  position:fixed;z-index:40;min-width:190px;
+  background:var(--ground-2);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 14px 34px var(--shadow);padding:10px;
+  display:flex;flex-direction:column;gap:8px;font-size:13px;
+}
+.tape-edit-title{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--ink-soft)}
+.tape-edit-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tape-edit-row span{font-variant-numeric:tabular-nums;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px}
+.tape-edit button{
+  appearance:none;border:2px solid var(--line);background:none;color:var(--ink);
+  font:inherit;font-weight:800;border-radius:999px;padding:4px 12px;cursor:pointer;
+}
+.tape-edit button:hover{border-color:var(--accent);color:var(--accent)}
+.tape-edit .del{border-color:var(--accent);color:var(--accent)}
 .tape-label{
   flex:0 0 auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;
   letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);padding-right:2px;
@@ -536,6 +556,7 @@ kbd{
     <a class="brand" href="./"><span class="s">Ти</span><span class="s">ту</span><span class="s">та</span><span class="s">тон</span></a>
     <div class="top-right">
       <a class="navlink" href="gallery.html">Галерея</a>
+      <a class="navlink" href="gallery.html?mine=1">Мои</a>
       <button class="wallet" id="walletBtn" type="button">Подключить кошелёк</button>
     </div>
   </nav>
@@ -578,7 +599,7 @@ kbd{
         </div>
         <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
         <div class="thanks" id="thanks" hidden>
-          <p class="thanks-word">спасибо!</p>
+          <p class="thanks-word">Спасибо!</p>
           <p class="thanks-said">Пушистики кланяются и убегают петь дальше.</p>
           <p class="note" id="thanksLinks"></p>
         </div>
@@ -599,6 +620,50 @@ kbd{
 
 <script src="settings.js"></script>
 <script src="wallet.js"></script>
+<script>
+/* Приход из карточки на Getgems.
+   Кнопки «Сыграть Web2/Web3» в NFT не могут нести адрес карточки: они одни
+   на все токены, иначе meta-JSON стал бы уникальным на токен. Зато браузер
+   сам приносит адрес страницы, с которой пришли, — document.referrer. Если
+   это Getgems, уводим человека не на главную с чеканкой, а в его кабинет
+   (галерею «Мои»): оттуда он найдёт своё. Если из адреса удалось вытащить
+   и саму карточку — реферер отдал полный путь, — открываем сразу её, да ещё
+   в режиме просмотра (?enjoy=1).
+   Площадки часто режут реферер до домена; тогда карточку не узнать, и
+   остаётся кабинет. Прямой заход без реферера не трогаем вовсе. */
+(function(){
+  "use strict";
+  var CFG = window.TTN_NET || {};
+  var ref = document.referrer || "";
+  if(!/^https?:\/\/([a-z0-9-]+\.)?getgems\.io\//i.test(ref)) return;
+  if(/[#&]nft=|[#&]s=/.test(location.hash || "")) return;
+
+  /* Сравнивать адреса строками нельзя: EQ…/kQ…/0Q… — один и тот же адрес
+     с разными тегом сети и crc16. Берём рабочую цепочку и 32-байтовый хеш. */
+  function core(a){
+    a = (a || "").replace(/-/g, "+").replace(/_/g, "/");
+    while(a.length % 4) a += "=";
+    var raw, b = [], i;
+    try { raw = atob(a); } catch(e){ return null; }
+    for(i = 0; i < raw.length; i++) b.push(raw.charCodeAt(i));
+    if(b.length < 34) return null;
+    var s = "";
+    for(i = 1; i < 34; i++) s += (b[i] < 16 ? "0" : "") + b[i].toString(16);
+    return s;
+  }
+
+  var item = /\/collection\/[A-Za-z0-9_-]+\/([A-Za-z0-9_-]{48})/.exec(ref);
+  var refCol = /\/collection\/([A-Za-z0-9_-]{48})/.exec(ref);
+  var ours = CFG.COLLECTION ? core(CFG.COLLECTION) : null;
+  var fromOurs = !!(refCol && ours && core(refCol[1]) === ours);
+
+  if(item && fromOurs){
+    location.replace(location.pathname + location.search + "#nft=" + item[1] + "&enjoy=1");
+    return;
+  }
+  location.replace("gallery.html?mine=1");
+})();
+</script>
 <script>
 (function(){
 "use strict";
@@ -1033,14 +1098,14 @@ function pushChip(s, note, gap){
   var rest = null;
   if(gap > 0){
     rest = document.createElement("span");
-    rest.className = "rest";
+    rest.className = "rest can-edit";
     rest.hidden = true;
     rest.setAttribute("aria-hidden", "true");
     tape.appendChild(rest);
   }
 
   var chip = document.createElement("span");
-  chip.className = "chip";
+  chip.className = "chip can-edit";
   chip.setAttribute("data-id", s.id);
   chip.style.setProperty("--cc", "var(--" + s.id + ")");
   chip.textContent = s.syl;
@@ -1230,6 +1295,183 @@ playBtn.addEventListener("click", playTape);
 document.getElementById("clear").addEventListener("click", function(){
   dropQueue(); stopPlay(); seedTape(); schedulePreview();
 });
+
+/* ---------------- мини-редактор ленты ----------------
+   Клик по ноте или по полоске паузы открывает маленькую карточку правки:
+   длительность паузы в шестнадцатых и удаление. Это ровно то, что песня
+   вообще хранит: нота в байтах одна, а пауза перед ней — четыре бита.
+   Ноту как таковую редактор не трогает — для этого есть зверята и точки. */
+(function(){
+  var box = null, at = -1, restMode = false;
+
+  function gaps(){
+    var g = [], i;
+    for(i = 1; i < seq.length; i++) g.push(seq[i].gap);
+    return g;
+  }
+  function sixNow(){ return sixOf(tempoOf(gaps())); }
+
+  /* Перерисовать ленту из seq. Нужно после удаления: элементы сдвигаются,
+     и находить их по старому индексу уже нельзя. */
+  function renderTape(){
+    tape.textContent = "";
+    seq.forEach(function(it){
+      if(it.gap > 0){
+        it.rest = document.createElement("span");
+        it.rest.className = "rest can-edit";
+        it.rest.hidden = true;
+        it.rest.setAttribute("aria-hidden", "true");
+        tape.appendChild(it.rest);
+      } else {
+        it.rest = null;
+      }
+      var chip = document.createElement("span");
+      chip.className = "chip can-edit";
+      chip.setAttribute("data-id", it.s.id);
+      chip.style.setProperty("--cc", "var(--" + it.s.id + ")");
+      chip.textContent = it.s.syl;
+      if(it.s.notes.length > 1){
+        var o = document.createElement("span");
+        o.className = "oct";
+        o.textContent = it.note.n;
+        chip.appendChild(o);
+      }
+      tape.appendChild(chip);
+      it.el = chip;
+    });
+    updateInfo();
+    schedulePreview();
+  }
+
+  function close(){
+    if(box && box.parentNode) box.parentNode.removeChild(box);
+    box = null; at = -1;
+  }
+
+  function place(){
+    var el = restMode ? (seq[at] && seq[at].rest) : (seq[at] && seq[at].el);
+    if(!el){ close(); return; }
+    var r = el.getBoundingClientRect();
+    var w = box.offsetWidth, h = box.offsetHeight;
+    var x = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.left + r.width / 2 - w / 2)));
+    var y = Math.round(r.top - h - 10);
+    if(y < 8) y = Math.round(r.bottom + 10);
+    box.style.left = x + "px";
+    box.style.top = y + "px";
+  }
+
+  function button(text, cls, fn){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    if(cls) b.className = cls;
+    b.addEventListener("click", function(e){ e.stopPropagation(); fn(); });
+    return b;
+  }
+
+  function bump(dir){
+    if(at < 1) return;
+    stopPlay(); dropQueue();
+    var six = sixNow();
+    var q = Math.max(0, Math.min(15, quantize(seq[at].gap, six) + dir));
+    seq[at].gap = q === 0 ? 0 : Math.max(MIN_GAP, Math.min(MAX_GAP, Math.round(q * six)));
+    renderTape();
+    if(restMode && seq[at].gap === 0) restMode = false;
+    paint();
+  }
+
+  function delNote(){
+    if(at < 0) return;
+    stopPlay(); dropQueue();
+    var i = at, gap = seq[i].gap;
+    seq.splice(i, 1);
+    /* Пауза удалённой ноты не пропадает: она прирастает к следующей ноте,
+       иначе вместе с нотой исчезала бы и тишина перед ней. */
+    if(gap && i >= 1 && i < seq.length){
+      seq[i].gap = Math.max(MIN_GAP, Math.min(MAX_GAP, seq[i].gap + gap));
+    }
+    close();
+    if(!seq.length){ seedTape(); schedulePreview(); return; }
+    renderTape();
+  }
+
+  function delPause(){
+    if(at < 1) return;
+    stopPlay(); dropQueue();
+    seq[at].gap = 0;
+    close();
+    renderTape();
+  }
+
+  function paint(){
+    if(at < 0 || !seq[at]){ close(); return; }
+    box.textContent = "";
+    var it = seq[at];
+
+    var title = document.createElement("div");
+    title.className = "tape-edit-title";
+    title.textContent = it.s.name + " · " + it.note.n;
+    box.appendChild(title);
+
+    if(at >= 1){
+      var q = quantize(it.gap, sixNow());
+      var row = document.createElement("div");
+      row.className = "tape-edit-row";
+      row.appendChild(button("−", null, function(){ bump(-1); }));
+      var lab = document.createElement("span");
+      lab.textContent = "пауза " + q + "/16";
+      row.appendChild(lab);
+      row.appendChild(button("+", null, function(){ bump(1); }));
+      box.appendChild(row);
+    }
+
+    if(restMode && at >= 1) box.appendChild(button("Убрать паузу", "del", delPause));
+    else box.appendChild(button("Удалить ноту", "del", delNote));
+
+    box.style.left = "0px"; box.style.top = "0px";
+    place();
+  }
+
+  function indexOfEl(node){
+    for(var i = 0; i < seq.length; i++){
+      if(seq[i].el === node) return { i:i, rest:false };
+      if(seq[i].rest === node) return { i:i, rest:true };
+    }
+    return null;
+  }
+
+  function open(i, isRest){
+    at = i; restMode = isRest;
+    stopPlay(); dropQueue();
+    if(!box){
+      box = document.createElement("div");
+      box.className = "tape-edit";
+      box.addEventListener("click", function(e){ e.stopPropagation(); });
+      document.body.appendChild(box);
+    }
+    paint();
+  }
+
+  tape.addEventListener("click", function(e){
+    var node = e.target, found = null;
+    while(node && node !== tape && !found){
+      found = indexOfEl(node);
+      node = node.parentNode;
+    }
+    if(found) open(found.i, found.rest);
+  });
+
+  document.addEventListener("click", function(e){
+    if(!box) return;
+    if(box.contains(e.target) || tape.contains(e.target)) return;
+    close();
+  }, true);
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") close();
+  });
+  window.addEventListener("resize", close);
+  tape.addEventListener("scroll", function(){ if(box) close(); });
+})();
 
 var muteBtn = document.getElementById("mute");
 muteBtn.addEventListener("click", function(){
@@ -2089,9 +2331,9 @@ function showThanks(tokenId, c){
     showCard(c);
     cardState.textContent = "отчеканена · #" + tokenId;
     thanksLinks.innerHTML = 'Карточка #' + tokenId + ' — <a href="' + CFG.MARKET + COLLECTION +
-      '" target="_blank" rel="noopener">в коллекции</a> · ' +
-      '<a href="#s=' + toHexBytes(c.bytes) + "&n=" + tokenId +
-      '">сыграть её</a>';
+      '" target="_blank" rel="noopener">в коллекции маркетплейса</a> · ' +
+      '<a href="#s=' + toHexBytes(c.bytes) + "&n=" + tokenId + "&enjoy=1" +
+      '">Просмотреть на сайте</a>';
   } else {
     thanksLinks.innerHTML = 'Кошелёк отправил, сеть ещё думает — ' +
       '<a href="' + CFG.EXPLORER + COLLECTION + '" target="_blank" rel="noopener">посмотреть коллекцию</a>';
@@ -2322,9 +2564,15 @@ drawPreview();
 /* Чужая карточка открывается двумя способами. Либо байтами в ссылке —
    …#s=54544e31640104004282e2&n=1, и тогда не нужна даже сеть. Либо адресом
    карточки — …#nft=EQ…, и тогда песня достаётся с чейна: в карточке лежат
-   ровно те же байты, из которых контракт нарисовал картинку. */
-(function(){
+    ровно те же байты, из которых контракт нарисовал картинку. */
+var lastHash = null;
+function openFromHash(){
   var hash = location.hash || "";
+  /* Тот же хэш дважды не трогаем: и загрузка страницы, и событие hashchange
+     зовут эту функцию, а лишний повтор сбрасывал бы ленту и заново ходил
+     в сеть за той же карточкой. */
+  if(hash === lastHash) return;
+  lastHash = hash;
   /* Флаг наслаждения: ?enjoy в адресе рядом с #s= или #nft=. Класс вешается
      только на открытую карточку (см. openCard) — пустой ленте он незачем. */
   var enjoy = /[#&]enjoy=1/.test(hash);
@@ -2387,7 +2635,13 @@ drawPreview();
       openCard(song, tokenId || (parseInt(j.stack[1].num, 16) + 1));
     })
     .catch(function(e){ cardState.textContent = e.message; });
-})();
+}
+
+/* Открываем и по загрузке, и когда хэш меняют на уже открытой странице:
+   «Просмотреть на сайте» в окне после минта — это тот же #s=…, и без
+   подписки на hashchange кнопка бы только меняла адрес, ничего не показывая. */
+openFromHash();
+window.addEventListener("hashchange", openFromHash);
 
 /* Шов для проверки паритета с контрактом: те же функции будут вызваны
    из теста рядом с get-методом в @ton/sandbox, и SVG обязан совпасть побайтово. */
