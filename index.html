@@ -93,6 +93,9 @@ body{
 
 /* ---------- шапка ---------- */
 .banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+/* display:flex выше перебивает браузерное [hidden]{display:none}, поэтому
+   прятанье баннера (при заходе на карточку) задаём явно. */
+.banner[hidden]{display:none}
 .eyebrow{
   margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(10px,2.6vw,12px);
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
