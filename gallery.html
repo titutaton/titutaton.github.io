@@ -163,6 +163,8 @@ h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(
   padding:9px 14px;border-radius:999px;border:2px solid var(--line);color:var(--ink);
 }
 .go:hover{border-color:var(--accent);color:var(--accent)}
+.actions{display:flex;gap:8px;margin-top:auto}
+.actions .go{flex:1;margin-top:0}
 .more{
   display:block;margin:26px auto 0;padding:11px 22px;border-radius:999px;
   border:2px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:800;cursor:pointer;
@@ -317,11 +319,24 @@ function nodeOf(c){
     body.appendChild(d);
   }
 
+  var actions = document.createElement("div");
+  actions.className = "actions";
+
   var a = document.createElement("a");
   a.className = "go";
   a.href = "index.html#nft=" + c.address;
   a.textContent = "Сыграть";
-  body.appendChild(a);
+  actions.appendChild(a);
+
+  /* Слушать — режим наслаждения: та же карточка, но большая и без чеканки.
+     Песня подтягивается главной сама по #nft=, лишних запросов здесь нет. */
+  var l = document.createElement("a");
+  l.className = "go";
+  l.href = "index.html#nft=" + c.address + "&enjoy=1";
+  l.textContent = "Слушать";
+  actions.appendChild(l);
+
+  body.appendChild(actions);
 
   el.appendChild(body);
   return el;
