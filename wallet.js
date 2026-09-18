@@ -92,11 +92,6 @@
         where.textContent = a.slice(0, 8) + '…' + a.slice(-6);
         menu.appendChild(where);
 
-        var mine = document.createElement('a');
-        mine.href = 'gallery.html?mine';
-        mine.textContent = 'Мои карточки';
-        menu.appendChild(mine);
-
         var exit = document.createElement('button');
         exit.type = 'button';
         exit.textContent = 'Отключить';
