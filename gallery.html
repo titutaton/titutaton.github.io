@@ -230,11 +230,14 @@ var state = document.getElementById("state");
 var more = document.getElementById("more");
 var foot = document.getElementById("foot");
 var find = document.getElementById("find");
+if(qFromUrl) find.value = decodeURIComponent(qFromUrl[1].replace(/\+/g, " "));
 var refresh = document.getElementById("refresh");
 var tabAll = document.getElementById("tabAll");
 var tabMine = document.getElementById("tabMine");
 
 var mode = /[?&]mine\b/.test(location.search) ? "mine" : "all";
+/* Фильтр по признаку приходит ссылкой из плашки трейта (`?q=тип: значение`). */
+var qFromUrl = /[?&]q=([^&]*)/.exec(location.search);
 var cards = [], total = 0, taken = 0, busy = false, done = false;
 
 function say(s){ state.textContent = s; }

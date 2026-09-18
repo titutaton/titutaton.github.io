@@ -376,6 +376,10 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   transition:background .2s ease;
 }
 .rest.now{background:repeating-linear-gradient(90deg,var(--accent) 0 3px,transparent 3px 7px)}
+/* Нулевая пауза (аккорд): не тишина, а место, где её нет, — точка-ручка,
+   чтобы убранную паузу можно было вернуть кликом. */
+.rest.zero{width:6px;height:8px;border-radius:4px;background:var(--line);opacity:.5}
+.rest.zero:hover{opacity:1;background:var(--accent)}
 /* Мини-редактор ленты: клик по ноте или паузе открывает карточку правки.
    Править можно длительность паузы и само наличие ноты/паузы — то, что
    вообще выражено в байтах песни. Ноту как таковую тут не переучиваем. */
@@ -421,20 +425,59 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
    «Проиграть…» становится коротким «Стоп». */
 #play, #cardPlayBtn{min-width:12.5em;max-width:100%}
 
-/* Режим наслаждения (?enjoy в адресе, ведёт из галереи): только карточка
-   и её пропевание, без объяснений и чеканки. Зверята не тыкаются (иначе
-   черновик вернётся и вытеснит наслаждение), лента только показывает ход.
-   Кнопка одна — «Проиграть карточку», она же жест для звука (автоплей
-   браузеры режут, так что честного автостарта нет и не будет). */
+/* ============ премиальный просмотр (enjoy) — как страница NFT ============
+   ?enjoy в адресе рядом с #s=/#nft=. Слева большая картинка, справа
+   коллекция, имя, описание и трейты плашками; снизу две кнопки. Лента
+   наверху работает плеером, но не редактором: правка тут выключена.
+   Зверята убраны — это карточка, а не инструмент; вернуться к игре можно
+   кнопкой «Миксовать». Автостарта нет: браузеры режут звук без жеста. */
 body.enjoy .banner,
+body.enjoy .dossier,
+body.enjoy .footnote,
 body.enjoy #mintBtn,
 body.enjoy #mintNote,
 body.enjoy #thanks,
 body.enjoy #play,
-body.enjoy #clear{display:none}
+body.enjoy #clear,
+body.enjoy .specs,
+body.enjoy #metaBtn,
+body.enjoy .gg-eyebrow{display:none}
+/* Пушистиков не убираем — они поют. Но в просмотре их не тыкают: иначе
+   черновик вернётся и вытеснит чужую карточку. */
+body.enjoy #glade{pointer-events:none}
 body.enjoy #glade .lvl{pointer-events:none}
-body.enjoy .card-hold{max-width:660px;margin:0 auto}
-body.enjoy #cardPlayBtn:not([hidden]){display:inline-block;font-size:1.2em;padding:.85em 1.7em}
+/* В просмотре лента — не редактор: правка выключена, ручки не тыкаются. */
+body.enjoy .chip.can-edit,body.enjoy .rest.can-edit{cursor:default}
+body.enjoy .chip.can-edit:hover,body.enjoy .rest.can-edit:hover{outline:none}
+
+body.enjoy .mintbox{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(290px,.95fr);
+  gap:clamp(16px,3vw,36px);align-items:start;
+  margin-top:14px;background:none;border:0;border-radius:0;padding:0;backdrop-filter:none;
+}
+body.enjoy .mintbox > .console-head{display:none}
+body.enjoy .mint-grid{display:contents}
+body.enjoy .card-hold{grid-column:1;grid-row:1 / span 2;max-width:none;margin:0}
+body.enjoy .gg-preview{grid-column:2;grid-row:1;margin:0;padding:0;border:0}
+body.enjoy .mint-side{grid-column:2;grid-row:2}
+body.enjoy #cardPlayBtn:not([hidden]){display:inline-block;font-size:1.15em;padding:.9em 1.8em}
+body.enjoy .controls{flex-direction:column;align-items:stretch}
+body.enjoy .controls .btn{width:100%;text-align:center}
+
+.gg-collection{
+  display:none;margin:0 0 2px;color:var(--accent);text-decoration:none;
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;
+  letter-spacing:.14em;text-transform:uppercase;
+}
+.gg-collection:hover{text-decoration:underline}
+body.enjoy .gg-collection{display:inline-block}
+
+@media (max-width:700px){
+  body.enjoy .mintbox{grid-template-columns:1fr}
+  body.enjoy .card-hold{grid-column:1;grid-row:1}
+  body.enjoy .gg-preview{grid-column:1;grid-row:2}
+  body.enjoy .mint-side{grid-column:1;grid-row:3}
+}
 
 /* ---------- карточка песни (прототип NFT) ---------- */
 .mintbox{
@@ -493,7 +536,9 @@ body.enjoy #cardPlayBtn:not([hidden]){display:inline-block;font-size:1.2em;paddi
 .gg-trait{
   display:flex;flex-direction:column;gap:2px;min-width:84px;padding:7px 12px;
   background:var(--ground);border:1px solid var(--line);border-radius:10px;
+  text-decoration:none;color:inherit;cursor:pointer;
 }
+.gg-trait:hover{border-color:var(--accent)}
 .gg-trait-type{
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9.5px;
   letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
@@ -594,7 +639,8 @@ kbd{
         <dl class="specs" id="specs"></dl>
         <div class="controls">
           <button class="btn" id="mintBtn" type="button">Отчеканить</button>
-          <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Проиграть карточку</button>
+          <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Слушать</button>
+          <button class="btn ghost" id="mixBtn" type="button" hidden>Миксовать</button>
           <button class="btn ghost" id="metaBtn" type="button" aria-expanded="false">Показать метаданные</button>
         </div>
         <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
@@ -608,6 +654,7 @@ kbd{
     </div>
 
     <div class="gg-preview">
+      <a class="gg-collection" href="gallery.html">Коллекция Титутатон</a>
       <p class="gg-eyebrow">Предпросмотр описания и атрибутов</p>
       <div id="ggOut"></div>
     </div>
@@ -1072,8 +1119,10 @@ function showRests(six, upto){
     if(heard && i < upto) rests++;
     var r = seq[i].rest;
     if(r){
-      r.hidden = !heard;
-      r.style.width = Math.min(52, q * 4) + "px";
+      /* Нулевую паузу не прячем: это ручка, которой её возвращают. */
+      r.hidden = !(heard || q === 0);
+      r.classList.toggle("zero", q === 0);
+      r.style.width = q === 0 ? "" : Math.min(52, q * 4) + "px";
     }
   }
   return rests;
@@ -1092,13 +1141,12 @@ function addChip(s, note){
 function pushChip(s, note, gap){
   if(tapeSeeded){ tape.innerHTML = ""; tapeSeeded = false; lastAt = 0; }
 
-  /* Полоска тишины заводится всегда, а показать её или нет — решит
-     updateInfo, когда посчитает темп: пауза это или спешка, видно только
-     относительно темпа самой песни. */
+  /* Пауза есть у всех нот, кроме первой: нулевую тоже заводим ручкой,
+     чтобы убранную паузу можно было вернуть кликом. */
   var rest = null;
-  if(gap > 0){
+  if(gap > 0 || seq.length > 0){
     rest = document.createElement("span");
-    rest.className = "rest can-edit";
+    rest.className = "rest can-edit" + (gap > 0 ? "" : " zero");
     rest.hidden = true;
     rest.setAttribute("aria-hidden", "true");
     tape.appendChild(rest);
@@ -1238,7 +1286,7 @@ function stopPlay(){
   playBtn.textContent = "Проиграть ленту";
   playBtn.classList.remove("live");
   var cp = document.getElementById("cardPlayBtn");
-  if(cp){ cp.textContent = "Проиграть карточку"; cp.classList.remove("live"); }
+  if(cp){ cp.textContent = "Слушать"; cp.classList.remove("live"); }
 }
 
 /* Лента помнит три вещи: ноту, ступень, на которой Тонтон пел в тот раз,
@@ -1273,7 +1321,7 @@ function playTape(){
   if(cp){ cp.textContent = "Стоп"; cp.classList.add("live"); }
 
   items.forEach(function(it){
-    if(it.rest){
+    if(it.rest && it.gap > 0){
       timers.push(setTimeout(function(){ it.rest.classList.add("now"); }, Math.max(0, it.t - it.gap + 240)));
       timers.push(setTimeout(function(){ it.rest.classList.remove("now"); }, it.t));
     }
@@ -1297,10 +1345,11 @@ document.getElementById("clear").addEventListener("click", function(){
 });
 
 /* ---------------- мини-редактор ленты ----------------
-   Клик по ноте или по полоске паузы открывает маленькую карточку правки:
-   длительность паузы в шестнадцатых и удаление. Это ровно то, что песня
-   вообще хранит: нота в байтах одна, а пауза перед ней — четыре бита.
-   Ноту как таковую редактор не трогает — для этого есть зверята и точки. */
+   Выбрал ноту — правишь ноту (удалить). Выбрал паузу — правишь паузу
+   (длительность в шестнадцатых, убрать/поставить). Смешивать нельзя: в
+   байтах песни у ноты ровно одна длительность, а всё переменное — пауза
+   перед ней, четыре бита. Паузу можно убрать совсем (q=0): тогда ноты
+   звучат вместе, аккордом, — контракт такие байты принимает и играет. */
 (function(){
   var box = null, at = -1, restMode = false;
 
@@ -1315,10 +1364,12 @@ document.getElementById("clear").addEventListener("click", function(){
      и находить их по старому индексу уже нельзя. */
   function renderTape(){
     tape.textContent = "";
-    seq.forEach(function(it){
-      if(it.gap > 0){
+    seq.forEach(function(it, ix){
+      /* Пауза есть у каждой ноты, кроме первой: даже нулевая. Убранная
+         пауза рисуется точкой-ручкой, чтобы её можно было вернуть. */
+      if(ix > 0){
         it.rest = document.createElement("span");
-        it.rest.className = "rest can-edit";
+        it.rest.className = "rest can-edit" + (it.gap > 0 ? "" : " zero");
         it.rest.hidden = true;
         it.rest.setAttribute("aria-hidden", "true");
         tape.appendChild(it.rest);
@@ -1369,15 +1420,24 @@ document.getElementById("clear").addEventListener("click", function(){
     return b;
   }
 
-  function bump(dir){
+  /* Пауза живёт в двух состояниях: нет (0 — ноты сливаются в аккорд) и от
+     REST_Q до 15/16. Промежуток 1..4 нарочно не выставляем: такие паузы в
+     ленте не видны (см. showRests), и правка ушла бы в невидимое. */
+  function setPause(q){
     if(at < 1) return;
     stopPlay(); dropQueue();
     var six = sixNow();
-    var q = Math.max(0, Math.min(15, quantize(seq[at].gap, six) + dir));
     seq[at].gap = q === 0 ? 0 : Math.max(MIN_GAP, Math.min(MAX_GAP, Math.round(q * six)));
     renderTape();
-    if(restMode && seq[at].gap === 0) restMode = false;
     paint();
+  }
+
+  function bump(dir){
+    if(at < 1) return;
+    var q = quantize(seq[at].gap, sixNow());
+    if(dir > 0) q = q < REST_Q ? REST_Q : Math.min(15, q + 1);
+    else q = q <= REST_Q ? 0 : q - 1;
+    setPause(q);
   }
 
   function delNote(){
@@ -1386,20 +1446,16 @@ document.getElementById("clear").addEventListener("click", function(){
     var i = at, gap = seq[i].gap;
     seq.splice(i, 1);
     /* Пауза удалённой ноты не пропадает: она прирастает к следующей ноте,
-       иначе вместе с нотой исчезала бы и тишина перед ней. */
-    if(gap && i >= 1 && i < seq.length){
-      seq[i].gap = Math.max(MIN_GAP, Math.min(MAX_GAP, seq[i].gap + gap));
+       иначе вместе с нотой исчезала бы и тишина перед ней. А если удалили
+       самую первую ноту, пауза новой первой сгорает: у первой её нет. */
+    if(seq.length){
+      if(i === 0) seq[0].gap = 0;
+      else if(gap && i < seq.length){
+        seq[i].gap = Math.max(MIN_GAP, Math.min(MAX_GAP, seq[i].gap + gap));
+      }
     }
     close();
     if(!seq.length){ seedTape(); schedulePreview(); return; }
-    renderTape();
-  }
-
-  function delPause(){
-    if(at < 1) return;
-    stopPlay(); dropQueue();
-    seq[at].gap = 0;
-    close();
     renderTape();
   }
 
@@ -1407,26 +1463,30 @@ document.getElementById("clear").addEventListener("click", function(){
     if(at < 0 || !seq[at]){ close(); return; }
     box.textContent = "";
     var it = seq[at];
+    var q = quantize(it.gap, sixNow());
 
     var title = document.createElement("div");
     title.className = "tape-edit-title";
-    title.textContent = it.s.name + " · " + it.note.n;
+    title.textContent = restMode
+      ? (q === 0 ? "Без паузы" : "Пауза " + q + "/16")
+      : it.s.name + " · " + it.note.n;
     box.appendChild(title);
 
-    if(at >= 1){
-      var q = quantize(it.gap, sixNow());
+    if(restMode){
       var row = document.createElement("div");
       row.className = "tape-edit-row";
       row.appendChild(button("−", null, function(){ bump(-1); }));
       var lab = document.createElement("span");
-      lab.textContent = "пауза " + q + "/16";
+      lab.textContent = q === 0 ? "аккорд" : q + "/16";
       row.appendChild(lab);
       row.appendChild(button("+", null, function(){ bump(1); }));
       box.appendChild(row);
+      box.appendChild(q === 0
+        ? button("Поставить паузу", "del", function(){ setPause(REST_Q); })
+        : button("Убрать паузу", "del", function(){ setPause(0); }));
+    } else {
+      box.appendChild(button("Удалить ноту", "del", delNote));
     }
-
-    if(restMode && at >= 1) box.appendChild(button("Убрать паузу", "del", delPause));
-    else box.appendChild(button("Удалить ноту", "del", delNote));
 
     box.style.left = "0px"; box.style.top = "0px";
     place();
@@ -1453,6 +1513,7 @@ document.getElementById("clear").addEventListener("click", function(){
   }
 
   tape.addEventListener("click", function(e){
+    if(document.body.classList.contains("enjoy")) return;
     var node = e.target, found = null;
     while(node && node !== tape && !found){
       found = indexOfEl(node);
@@ -2218,9 +2279,13 @@ function ggPreview(c){
   var attrs = attrsOf(c.song, c.tr);
   var tiles = attrs.map(function(a){
     var cls = a.trait_type === "Приметы" ? "gg-trait rare" : "gg-trait";
-    return '<div class="' + cls + '">' +
+    /* Клик по плашке ведёт в галерею, отфильтрованную по признаку: у
+       «Примет» поиск умеет значение и без имени типа, у остальных —
+       строку «тип: значение» (так их склеивает traitsOf). */
+    var q = a.trait_type === "Приметы" ? a.value : a.trait_type + ": " + a.value;
+    return '<a class="' + cls + '" href="gallery.html?q=' + encodeURIComponent(q) + '">' +
       '<span class="gg-trait-type">' + a.trait_type + '</span>' +
-      '<span class="gg-trait-value">' + a.value + '</span></div>';
+      '<span class="gg-trait-value">' + a.value + '</span></a>';
   }).join("");
   return '<p class="gg-name">' + nftName(c) + '</p>' +
     '<p class="gg-desc">' + nftDescription(c) + '</p>' +
@@ -2389,6 +2454,19 @@ document.getElementById("mintBtn").addEventListener("click", function(){
    байты, и по ним песня восстанавливается целиком — ноты, октавы, темп и
    паузы. Лента при этом может содержать что угодно другое. */
 var cardPlayBtn = document.getElementById("cardPlayBtn");
+var mixBtn = document.getElementById("mixBtn");
+
+/* «Миксовать» из просмотра: возвращаем страницу в режим инструмента — песня
+   уже лежит в ленте (её туда положил openCard), можно править и чеканить
+   свою. Адрес чистим от enjoy, чтобы перезагрузка не вернула просмотр. */
+mixBtn.addEventListener("click", function(){
+  document.body.classList.remove("enjoy");
+  mixBtn.hidden = true;
+  try{
+    history.replaceState(null, "", location.pathname + location.search +
+      location.hash.replace(/[&]?enjoy=1/, ""));
+  }catch(e){}
+});
 
 function playFromBytes(bytes){
   var song = decodeSong(bytes);
@@ -2599,6 +2677,7 @@ function openFromHash(){
 
     showCard(c);
     if(enjoy) document.body.classList.add("enjoy");
+    mixBtn.hidden = !enjoy;
     cardPlayBtn.hidden = false;
     cardState.textContent = tokenId ? "#" + tokenId + " по ссылке" : "по ссылке";
     tapeInfo.textContent = (tokenId ? "карточка #" + tokenId : "карточка по ссылке") +
