@@ -298,8 +298,10 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   margin:calc(-1 * var(--py)) calc(-1 * var(--px)) clamp(10px,3vw,22px);
   padding:calc(var(--py) * .5) var(--px) 10px;
   background:var(--ground);
-  background:color-mix(in srgb, var(--ground) 88%, transparent);
-  backdrop-filter:blur(10px);
+  /* Без backdrop-filter: размытие фона под закреплённой шапкой GPU
+     пересчитывает каждый кадр прокрутки. Плотность поднята, чтобы текст
+     при прокрутке не просвечивал — то же читается, но почти бесплатно. */
+  background:color-mix(in srgb, var(--ground) 96%, transparent);
   border-bottom:1px solid var(--line);
 }
 .brand{
@@ -446,7 +448,11 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:0 3px 0 var(--line);border-color:var(--line)}
 .btn.ghost:hover{box-shadow:0 5px 0 var(--line)}
-.btn.live{border-color:var(--accent);color:var(--accent);box-shadow:0 3px 0 var(--accent)}
+.btn.live{border-color:var(--accent);box-shadow:0 3px 0 var(--accent)}
+/* У залитой кнопки (палец-«Проиграть…») акцентный текст сливался с её же
+   акцентным фоном — «Стоп» не читался. Заливаемую в игре затемняем. */
+.btn:not(.ghost).live{background:var(--eye);color:#FFF8FA}
+.btn.ghost.live{color:var(--accent)}
 .btn.live:hover{box-shadow:0 5px 0 var(--accent)}
 .btn:focus-visible{outline:3px dashed var(--accent);outline-offset:3px}
 /* Кнопки проигрывания не прыгают в ширине, когда длинное
@@ -644,6 +650,12 @@ kbd{
   @keyframes popq{0%{opacity:0}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-30px)}}
   .btn,.critter{transition:none}
 }
+
+/* Не смотрят — не двигаются. Класс на <html> ставит наблюдатель ниже,
+   когда вкладка скрыта или поляна целиком ушла за экран: бесконечные
+   blink/bob иначе держат GPU занятым даже в свёрнутом окне. !important —
+   потому что .critter.singing .bob перебивает animation-play-state. */
+html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
 </style>
 
 <div class="page">
@@ -2536,8 +2548,12 @@ var mixBtn = document.getElementById("mixBtn");
    уже лежит в ленте (её туда положил openCard), можно править и чеканить
    свою. Адрес чистим от enjoy, чтобы перезагрузка не вернула просмотр. */
 mixBtn.addEventListener("click", function(){
+  stopPlay();
   document.body.classList.remove("enjoy");
   mixBtn.hidden = true;
+  /* Уходим из просмотра — «Слушать» тут тоже лишняя: карточка снова стала
+     инструментом, а играет лента. */
+  cardPlayBtn.hidden = true;
   try{
     history.replaceState(null, "", location.pathname + location.search +
       location.hash.replace(/[&]?enjoy=1/, ""));
@@ -2715,6 +2731,19 @@ document.addEventListener("keydown", function(e){ if(e.key === "Escape") techMod
     resizePending = true;
     requestAnimationFrame(function(){ resizePending = false; seatTwice(); });
   });
+})();
+
+/* Двигаемся, только пока на нас смотрят. Вкладка ушла в фон или поляна
+   прокрутилась мимо — вешаем html.asleep, он гасит вечные анимации зверят
+   (см. CSS выше). Так браузер не тратит кадры на то, чего не видно. */
+(function(){
+  var root = document.documentElement, shown = !document.hidden, onScreen = true;
+  function sync(){ root.classList.toggle("asleep", !(shown && onScreen)); }
+  document.addEventListener("visibilitychange", function(){ shown = !document.hidden; sync(); });
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(e){ onScreen = e[0].isIntersecting; sync(); }).observe(glade);
+  }
+  sync();
 })();
 
 drawPreview();
