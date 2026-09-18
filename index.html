@@ -421,11 +421,8 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 /* display:inline-flex выше перебил бы атрибут hidden: у кнопок в разметке
    он есть, и без этого спрятанные показывались. */
 .mint-side .controls .btn[hidden]{display:none}
-/* Длинные подписи — чеканка и техническая кнопка — на всю ширину, а
-   «Слушать» с «Миксовать» делят ряд поровну. */
+/* «Отчеканить» — на всю ширину; «Слушать» с «Миксовать» делят ряд поровну. */
 #mintBtn{grid-column:1 / -1}
-#techBtn{grid-column:1 / -1}
-.tech{margin:0 0 4px}
 .btn{
   appearance:none;font:inherit;font-weight:800;cursor:pointer;
   padding:11px 18px;border-radius:999px;border:2px solid var(--ink);
@@ -458,7 +455,6 @@ body.enjoy #mintNote,
 body.enjoy #thanks,
 body.enjoy #play,
 body.enjoy #clear,
-body.enjoy #tech,
 body.enjoy #techBtn,
 body.enjoy .gg-eyebrow{display:none}
 body.enjoy #glade{pointer-events:none}
@@ -480,21 +476,18 @@ body.enjoy .gg-collection{display:inline-block}
    большая картинка, справа имя, описание, трейты и органы управления. */
 .mintbox{
   --cardw:min(680px, calc((100vh - 200px) * 0.7143));
-  margin-top:16px;display:grid;
-  grid-template-columns:minmax(0, var(--cardw)) minmax(320px, 1fr);
-  gap:clamp(16px,3vw,32px) 14px;align-items:start;
+  margin-top:16px;display:grid;gap:clamp(14px,2.5vw,22px);
   background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(13px,3vw,22px);backdrop-filter:blur(6px);
 }
 .mintbox > *, .console > *{min-width:0}
-.mintbox > .console-head{grid-column:1 / -1;grid-row:1}
-/* display:contents — чтобы card-hold и mint-side стали колонками самого
-   mintbox, а порядок задавали строки ниже: иначе mint-side, стоящий в
-   разметке раньше gg-preview, встал бы над трейтами. */
-.mint-grid{display:contents}
-.card-hold{grid-column:1;grid-row:2 / span 2}
-.gg-preview{grid-column:2;grid-row:2}
-.mint-side{grid-column:2;grid-row:3}
+/* Слева карточка, справа — колонка с именем, описанием, трейтами и
+   кнопками. Правая колонка идёт обычным потоком, поэтому кнопки стоят
+   сразу под трейтами, а не висят где-то посередине карточки. */
+.mint-grid{
+  display:grid;grid-template-columns:minmax(0, var(--cardw)) minmax(320px, 1fr);
+  gap:clamp(16px,3vw,32px);align-items:start;
+}
 /* Длинный hex песни в specs — без пробелов: без min-width:0 грид-элемент
    распирает колонку шире экрана, и вместе с ним уезжает и картинка. */
 .mint-grid > *, .mint-side{min-width:0;max-width:100%}
@@ -531,18 +524,46 @@ body.enjoy .gg-collection{display:inline-block}
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;line-height:1.5;
   white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);
 }
+
+/* Ссылка «техническая информация» рядом со словом «черновик/пример» —
+   маленькая и не мозолит; всё техническое открывается отдельным окном. */
+.techlink{
+  appearance:none;border:1px dashed var(--line);background:none;color:var(--ink-soft);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;
+  letter-spacing:.06em;border-radius:999px;padding:2px 9px;margin-left:8px;
+  cursor:pointer;vertical-align:middle;white-space:nowrap;
+}
+.techlink:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Модалка технической информации. */
+.modal{
+  position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  padding:clamp(12px,4vw,40px);background:rgba(11,15,34,.55);backdrop-filter:blur(3px);
+}
+.modal[hidden]{display:none}
+.modal-box{
+  width:100%;max-width:min(760px,100%);max-height:min(86vh,900px);overflow:auto;
+  background:var(--ground-2);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 24px 60px var(--shadow);padding:clamp(14px,3vw,24px);
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.modal-head h3{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:20px}
+.modal-x{
+  appearance:none;border:2px solid var(--line);background:none;color:var(--ink);
+  width:34px;height:34px;border-radius:999px;font:inherit;font-weight:800;font-size:18px;
+  line-height:1;cursor:pointer;flex:0 0 auto;
+}
+.modal-x:hover{border-color:var(--accent);color:var(--accent)}
+
 @media (max-width:760px){
-  .mintbox{grid-template-columns:1fr;--cardw:100%}
-  .mintbox > .console-head{grid-column:1;grid-row:1}
-  .card-hold{grid-column:1;grid-row:2}
-  .gg-preview{grid-column:1;grid-row:3}
-  .mint-side{grid-column:1;grid-row:4}
+  .mint-grid{grid-template-columns:1fr}
+  .mintbox{--cardw:100%}
 }
 
 /* Предпросмотр «как на Getgems»: то же имя, описание и трейты, что уедут
    в get_nft_content, только не JSON-строкой, а плитками — примерно как их
    разложит сама витрина маркетплейса. */
-.gg-preview{margin:0;padding:0;border:0}
+.gg-preview{margin:0 0 14px;padding:0;border:0}
 .gg-eyebrow{
   margin:0 0 10px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -647,21 +668,21 @@ kbd{
 
   <section class="mintbox">
     <div class="console-head">
-      <h2 class="console-title">Карточка песни <span class="tape-info" id="cardState">черновик</span></h2>
+      <h2 class="console-title">Карточка песни <span class="tape-info" id="cardState">черновик</span> <button class="techlink" id="techBtn" type="button">техническая информация</button></h2>
       <span class="console-title">SVG целиком на чейне</span>
     </div>
     <div class="mint-grid">
       <div class="card-hold" id="cardHold"></div>
       <div class="mint-side">
-        <div class="tech" id="tech" hidden>
-          <dl class="specs" id="specs"></dl>
-          <pre class="meta" id="metaOut"></pre>
+        <div class="gg-preview">
+          <a class="gg-collection" href="gallery.html">Коллекция Титутатон</a>
+          <p class="gg-eyebrow">Предпросмотр описания и атрибутов</p>
+          <div id="ggOut"></div>
         </div>
         <div class="controls">
           <button class="btn" id="mintBtn" type="button">Отчеканить</button>
           <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Слушать</button>
           <button class="btn ghost" id="mixBtn" type="button" hidden>Миксовать</button>
-          <button class="btn ghost" id="techBtn" type="button" aria-expanded="false">Показать техническую информацию</button>
         </div>
         <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
         <div class="thanks" id="thanks" hidden>
@@ -671,17 +692,24 @@ kbd{
         </div>
       </div>
     </div>
-
-    <div class="gg-preview">
-      <a class="gg-collection" href="gallery.html">Коллекция Титутатон</a>
-      <p class="gg-eyebrow">Предпросмотр описания и атрибутов</p>
-      <div id="ggOut"></div>
-    </div>
   </section>
 
   <div class="dossier" id="dossier"></div>
 
   <p class="footnote">Клавиши <kbd>1</kbd>–<kbd>9</kbd> — это ноты, все девять: цифра написана прямо на точке. У малышей по две ноты, у Тонтона одна до в трёх октавах — вместе вся гамма. <kbd>0</kbd> проигрывает ленту. Точки — тоже инструмент: выбирают ноту и сразу поют, попадая в ленту. Быстрее, чем лента умеет запоминать, сыграть не выйдет: торопливые нажатия становятся перебором — ровно тем, что потом прозвучит с карточки. Чем ниже поёт квартет, тем темнее небо на карточке.</p>
+</div>
+
+<!-- Техническая информация — по клику, отдельным окном: в самой карточке
+     она ни к чему, а посмотреть иногда надо. -->
+<div class="modal" id="techModal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-label="Техническая информация">
+    <div class="modal-head">
+      <h3>Техническая информация</h3>
+      <button class="modal-x" id="techClose" type="button" aria-label="Закрыть">×</button>
+    </div>
+    <dl class="specs" id="specs"></dl>
+    <pre class="meta" id="metaOut"></pre>
+  </div>
 </div>
 
 <script src="settings.js"></script>
@@ -2216,8 +2244,9 @@ var specsEl = document.getElementById("specs");
 var ggOut = document.getElementById("ggOut");
 var cardState = document.getElementById("cardState");
 var metaOut = document.getElementById("metaOut");
-var tech = document.getElementById("tech");
 var techBtn = document.getElementById("techBtn");
+var techModal = document.getElementById("techModal");
+var techClose = document.getElementById("techClose");
 var current = null, previewPending = 0;
 
 function currentItems(){
@@ -2266,7 +2295,7 @@ function showCard(c){
     '<dt>картинка</dt><dd>' + svgBytes + ' байт · <b>' + Math.ceil(svgBytes / 127) + '</b> ячеек змейки</dd>' +
     '<dt>приметы</dt><dd>' + (c.tr.rare.length ? c.tr.rare.join(", ") : "—") + '</dd>';
   ggOut.innerHTML = ggPreview(c);
-  if(tech && !tech.hidden) metaOut.textContent = metaText(c);
+  if(techModal && !techModal.hidden) metaOut.textContent = metaText(c);
 }
 
 /* Имя и описание — ровно то, что положит контракт в get_nft_content:
@@ -2518,11 +2547,12 @@ cardPlayBtn.addEventListener("click", function(){
 });
 
 techBtn.addEventListener("click", function(){
-  tech.hidden = !tech.hidden;
-  techBtn.setAttribute("aria-expanded", tech.hidden ? "false" : "true");
-  techBtn.textContent = tech.hidden ? "Показать техническую информацию" : "Скрыть техническую информацию";
-  if(!tech.hidden && current) metaOut.textContent = metaText(current);
+  techModal.hidden = false;
+  if(current) metaOut.textContent = metaText(current);
 });
+techClose.addEventListener("click", function(){ techModal.hidden = true; });
+techModal.addEventListener("click", function(e){ if(e.target === techModal) techModal.hidden = true; });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape") techModal.hidden = true; });
 
 /* Кочка на поляне.
 
