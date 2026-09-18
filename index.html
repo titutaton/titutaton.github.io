@@ -88,6 +88,7 @@ body{
 
 /* ---------- шапка ---------- */
 .banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.banner.gone{display:none}
 .eyebrow{
   margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(10px,2.6vw,12px);
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -2792,5 +2793,27 @@ document.addEventListener("keydown", function(e){
   strike(KEYS[k].s, KEYS[k].i);
   nodes[KEYS[k].s.id].focus();
 });
+
+/* Шапка с объяснением нужна один раз. Как только её прокрутили целиком,
+   она убирается и больше не возвращается — новая появится только при
+   новом открытии страницы. Убираем мгновенно, но компенсируем прокрутку
+   на её высоту: без этого всё, на что человек смотрит, прыгнуло бы вверх. */
+(function(){
+  var banner = document.querySelector(".banner");
+  if(!banner || !window.IntersectionObserver) return;
+  var io = new IntersectionObserver(function(entries){
+    for(var i = 0; i < entries.length; i++){
+      var e = entries[i];
+      /* интересен только случай «шапка целиком ушла вверх» */
+      if(e.isIntersecting || e.boundingClientRect.bottom > 0) continue;
+      io.disconnect();
+      var h = banner.offsetHeight;
+      banner.classList.add("gone");
+      if(h) window.scrollBy(0, -h);
+      break;
+    }
+  });
+  io.observe(banner);
+})();
 })();
 </script>
