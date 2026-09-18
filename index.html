@@ -140,15 +140,18 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 /* Коэффициенты vw подобраны так, чтобы на прежней ширине страницы (1020)
    пушистики были того же размера; дальше, на широком экране, растут вместе
    с местом, пока не упрутся в свой потолок или в ширину колонки. */
-.seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--w:clamp(60px,16.5vw,300px);margin-bottom:6px}
-.seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--w:clamp(64px,17.25vw,315px);margin-bottom:24px}
-.seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--w:clamp(62px,16.9vw,305px);margin-bottom:10px}
-.seat[data-id="ton"]{--c:var(--ton);--c-deep:var(--ton-deep);--c-soft:var(--ton-soft);--w:clamp(96px,24.7vw,440px)}
+/* --c-face — «мордочка» (живот и нутро ушей). На карточке она фиксированно
+   светлая (skinS), поэтому в тёмной теме берём не --c-soft (он там тёмный),
+   а отдельный светлый тон: пушистик не должен темнеть от темы страницы. */
+.seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--c-face:#B7EADF;--w:clamp(60px,16.5vw,300px);margin-bottom:6px}
+.seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--c-face:#FBD9B6;--w:clamp(64px,17.25vw,315px);margin-bottom:24px}
+.seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--c-face:#DFCCF7;--w:clamp(62px,16.9vw,305px);margin-bottom:10px}
+.seat[data-id="ton"]{--c:var(--ton);--c-deep:var(--ton-deep);--c-soft:var(--ton-soft);--c-face:#C6CFEA;--w:clamp(96px,24.7vw,440px)}
 
 .body{fill:var(--c)}
-.belly{fill:var(--c-soft);opacity:.85}
+.belly{fill:var(--c-face);opacity:.85}
 .ear-outer{fill:var(--c-deep)}
-.ear-inner{fill:var(--c-soft);opacity:.9}
+.ear-inner{fill:var(--c-face);opacity:.9}
 .ear-inner.dim{opacity:.5}
 .foot{fill:var(--c-deep)}
 .cheek{fill:var(--c-deep);opacity:.42}
