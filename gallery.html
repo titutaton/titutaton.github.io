@@ -170,13 +170,14 @@ h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(
 .card img{display:block;width:100%;height:auto;background:var(--night)}
 .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .name{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:17px}
-.rare{display:flex;flex-wrap:wrap;gap:6px;margin:0}
-.rare span{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--ground-2);color:var(--accent)}
-.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.traits{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .fact{
   display:flex;flex-direction:column;gap:1px;padding:5px 10px;border-radius:10px;
   background:var(--ground-2);border:1px solid var(--line);min-width:0;
+  text-decoration:none;color:inherit;cursor:pointer;user-select:none;
 }
+.fact:hover{border-color:var(--accent)}
+.fact.rare .fact-type,.fact.rare .fact-value{color:var(--accent)}
 .fact-type{
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;
@@ -276,13 +277,14 @@ function say(s){ state.textContent = s; }
    описание — рассказ о песне, а не запасной способ доставить те же данные
    вторым путём. */
 function traitsOf(meta){
-  var attrs = (meta && meta.attributes) || [], rare = [], facts = [];
+  var attrs = (meta && meta.attributes) || [], traits = [];
   for(var i = 0; i < attrs.length; i++){
     var a = attrs[i];
-    if(a.trait_type === "Приметы") rare.push(String(a.value));
-    else facts.push({ type: a.trait_type, value: String(a.value) });
+    /* «Приметы» — те же трейты, просто редкости: и в списке, и по клику
+       они ведут себя так же, только подсвечены акцентом. */
+    traits.push({ type: a.trait_type, value: String(a.value), rare: a.trait_type === "Приметы" });
   }
-  return { rare: rare, facts: facts };
+  return traits;
 }
 
 function imageOf(meta){
@@ -301,10 +303,9 @@ function cardOf(item){
     address: item.address,
     name: meta.name || "Титутатон",
     image: imageOf(meta),
-    rare: t.rare,
-    facts: t.facts,
-    search: ((meta.name || "") + " " + t.rare.join(" ") + " " +
-      t.facts.map(function(x){ return x.type + ": " + x.value; }).join(" ")).toLowerCase(),
+    traits: t,
+    search: ((meta.name || "") + " " +
+      t.map(function(x){ return x.type + ": " + x.value; }).join(" ")).toLowerCase(),
   };
 }
 
@@ -334,23 +335,13 @@ function nodeOf(c){
   h.textContent = c.name;
   body.appendChild(h);
 
-  if(c.rare.length){
-    var r = document.createElement("p");
-    r.className = "rare";
-    c.rare.forEach(function(word){
-      var s = document.createElement("span");
-      s.textContent = word;
-      r.appendChild(s);
-    });
-    body.appendChild(r);
-  }
-
-  if(c.facts.length){
+  if(c.traits.length){
     var f = document.createElement("div");
-    f.className = "facts";
-    c.facts.forEach(function(x){
-      var s = document.createElement("span");
-      s.className = "fact";
+    f.className = "traits";
+    c.traits.forEach(function(x){
+      var s = document.createElement("a");
+      s.className = "fact" + (x.rare ? " rare" : "");
+      s.href = "gallery.html?q=" + encodeURIComponent(x.type + ": " + x.value);
       var ty = document.createElement("span");
       ty.className = "fact-type";
       ty.textContent = x.type;
