@@ -418,6 +418,9 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   display:inline-flex;align-items:center;justify-content:center;
   width:100%;min-width:0;text-align:center;padding-left:10px;padding-right:10px;
 }
+/* display:inline-flex выше перебил бы атрибут hidden: у кнопок в разметке
+   он есть, и без этого спрятанные показывались. */
+.mint-side .controls .btn[hidden]{display:none}
 /* Длинные подписи — чеканка и техническая кнопка — на всю ширину, а
    «Слушать» с «Миксовать» делят ряд поровну. */
 #mintBtn{grid-column:1 / -1}
@@ -545,10 +548,10 @@ body.enjoy .gg-collection{display:inline-block}
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
 }
 .gg-name{margin:0 0 6px;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:19px}
-.gg-desc{margin:0 0 14px;max-width:64ch;color:var(--ink-soft);font-size:14px;line-height:1.5}
+.gg-desc{margin:0 0 14px;color:var(--ink-soft);font-size:14px;line-height:1.5}
 .gg-traits{display:flex;flex-wrap:wrap;gap:8px}
 .gg-trait{
-  display:flex;flex-direction:column;gap:2px;min-width:84px;padding:7px 12px;
+  display:flex;flex-direction:column;gap:2px;min-width:150px;padding:7px 12px;
   background:var(--ground);border:1px solid var(--line);border-radius:10px;
   text-decoration:none;color:inherit;cursor:pointer;
 }
