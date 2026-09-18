@@ -56,13 +56,24 @@ body{
   font-family:"Nunito","Segoe UI",system-ui,sans-serif;
   font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%;
 }
-.page{max-width:none;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(16px,4vw,72px) 64px}
-
-/* ---------- шапка ---------- */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 clamp(10px,3vw,22px)}
+.page{
+  --px:clamp(16px,4vw,72px);--py:clamp(16px,4vw,44px);
+  max-width:none;margin:0 auto;padding:var(--py) var(--px) 64px;
+}
+/* Шапка закреплена, как на главной: кошелёк и переходы всегда под рукой. */
+.top{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:calc(-1 * var(--py)) calc(-1 * var(--px)) clamp(10px,3vw,22px);
+  padding:calc(var(--py) * .5) var(--px) 10px;
+  background:var(--ground);
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
 .brand{
   display:inline-flex;gap:0;text-decoration:none;
-  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4vw,21px);
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(24px,4.8vw,36px);
   letter-spacing:.01em;line-height:1;
 }
 .brand .s{display:inline-block}
@@ -150,11 +161,12 @@ h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(
 }
 
 /* ---------- сетка карточек ---------- */
-.grid{margin:18px 0 0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.grid{margin:18px 0 0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
 .card{
   background:var(--card);border:1px solid var(--line);border-radius:20px;
   overflow:hidden;display:flex;flex-direction:column;
 }
+.card .pic{display:block;line-height:0}
 .card img{display:block;width:100%;height:auto;background:var(--night)}
 .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .name{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:17px}
@@ -180,6 +192,8 @@ h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(
 .more[hidden]{display:none}
 .more:hover{border-color:var(--accent);color:var(--accent)}
 footer{margin:30px 0 0;text-align:center;color:var(--ink-soft);font-size:12.5px}
+.foot-lede{margin:0 auto 8px;max-width:70ch;color:var(--ink-soft);text-wrap:pretty}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 footer a{color:var(--accent)}
 </style>
 </head>
@@ -193,10 +207,7 @@ footer a{color:var(--accent)}
     </div>
   </nav>
 
-  <header>
-    <h1>Отчеканенные песни</h1>
-    <p class="lede">Каждую карточку нарисовал контракт из байтов её песни — и каждую можно послушать.</p>
-  </header>
+  <h1 class="sr-only">Отчеканенные песни</h1>
 
   <div class="bar">
     <div class="tabs" role="tablist">
@@ -210,7 +221,10 @@ footer a{color:var(--accent)}
   <p class="state" id="state">спрашиваем у чейна…</p>
   <div class="grid" id="grid"></div>
   <button class="more" id="more" hidden>Показать ещё</button>
-  <footer id="foot"></footer>
+  <footer>
+    <p class="foot-lede">Отчеканенные песни: каждую карточку нарисовал контракт из байтов её песни — и каждую можно послушать.</p>
+    <p id="foot"></p>
+  </footer>
 </div>
 
 <script src="settings.js"></script>
@@ -274,15 +288,13 @@ function imageOf(meta){
 function cardOf(item){
   var meta = item.metadata || {};
   var t = traitsOf(meta);
-  var desc = meta.description || "";
   return {
     address: item.address,
     name: meta.name || "Титутатон",
     image: imageOf(meta),
     rare: t.rare,
     facts: t.facts,
-    desc: desc,
-    search: ((meta.name || "") + " " + t.rare.join(" ") + " " + t.facts + " " + desc).toLowerCase(),
+    search: ((meta.name || "") + " " + t.rare.join(" ") + " " + t.facts).toLowerCase(),
   };
 }
 
@@ -292,11 +304,17 @@ function nodeOf(c){
   var el = document.createElement("article");
   el.className = "card";
 
+  /* Картинка — тот же переход «слушать»: по ней кликают чаще, чем по кнопке. */
   var img = document.createElement("img");
   img.loading = "lazy";
   img.alt = c.name;
   if(c.image) img.src = c.image;
-  el.appendChild(img);
+  var pic = document.createElement("a");
+  pic.className = "pic";
+  pic.href = "index.html#nft=" + c.address + "&enjoy=1";
+  pic.setAttribute("aria-label", c.name + " — слушать");
+  pic.appendChild(img);
+  el.appendChild(pic);
 
   var body = document.createElement("div");
   body.className = "body";
@@ -322,13 +340,6 @@ function nodeOf(c){
     f.className = "facts";
     f.textContent = c.facts;
     body.appendChild(f);
-  }
-
-  if(c.desc){
-    var d = document.createElement("p");
-    d.className = "desc";
-    d.textContent = c.desc;
-    body.appendChild(d);
   }
 
   var actions = document.createElement("div");

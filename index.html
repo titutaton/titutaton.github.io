@@ -84,11 +84,13 @@ body{
   line-height:1.55;
   -webkit-text-size-adjust:100%;
 }
-.page{max-width:none;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(16px,4vw,72px) 48px;}
+.page{
+  --px:clamp(16px,4vw,72px);--py:clamp(16px,4vw,44px);
+  max-width:none;margin:0 auto;padding:var(--py) var(--px) 48px;
+}
 
 /* ---------- шапка ---------- */
 .banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.banner.gone{display:none}
 .eyebrow{
   margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(10px,2.6vw,12px);
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -287,13 +289,22 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
    «черновиком», тем же шрифтом и тем же весом, и не спорит с кнопкой минта. */
 /* Шапка сайта. Кошелёк там, где его ищут, — справа вверху, и рядом с ним
    переход в галерею: две вещи про весь сайт, а не про эту страницу. */
+/* Шапка закреплена: кошелёк и переходы всегда под рукой. Тянется на всю
+   ширину (отрицательные поля гасят паддинг страницы), фон приглушён, чтобы
+   текст при прокрутке под ней не сливался. */
 .top{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  flex-wrap:wrap;margin:0 0 clamp(10px,3vw,22px);
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  margin:calc(-1 * var(--py)) calc(-1 * var(--px)) clamp(10px,3vw,22px);
+  padding:calc(var(--py) * .5) var(--px) 10px;
+  background:var(--ground);
+  background:color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
 }
 .brand{
   display:inline-flex;gap:0;text-decoration:none;
-  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(17px,4vw,21px);
+  font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(24px,4.8vw,36px);
   letter-spacing:.01em;line-height:1;
 }
 .brand .s{display:inline-block}
@@ -2793,27 +2804,5 @@ document.addEventListener("keydown", function(e){
   strike(KEYS[k].s, KEYS[k].i);
   nodes[KEYS[k].s.id].focus();
 });
-
-/* Шапка с объяснением нужна один раз. Как только её прокрутили целиком,
-   она убирается и больше не возвращается — новая появится только при
-   новом открытии страницы. Убираем мгновенно, но компенсируем прокрутку
-   на её высоту: без этого всё, на что человек смотрит, прыгнуло бы вверх. */
-(function(){
-  var banner = document.querySelector(".banner");
-  if(!banner || !window.IntersectionObserver) return;
-  var io = new IntersectionObserver(function(entries){
-    for(var i = 0; i < entries.length; i++){
-      var e = entries[i];
-      /* интересен только случай «шапка целиком ушла вверх» */
-      if(e.isIntersecting || e.boundingClientRect.bottom > 0) continue;
-      io.disconnect();
-      var h = banner.offsetHeight;
-      banner.classList.add("gone");
-      if(h) window.scrollBy(0, -h);
-      break;
-    }
-  });
-  io.observe(banner);
-})();
 })();
 </script>
