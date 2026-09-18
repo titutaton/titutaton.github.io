@@ -675,6 +675,7 @@ kbd{
       <button class="btn" id="play" type="button">Проиграть ленту</button>
       <button class="btn ghost" id="mute" type="button" aria-pressed="false">Звук: включён</button>
       <button class="btn ghost" id="clear" type="button">Очистить ленту</button>
+      <button class="btn ghost" id="toCard" type="button">К карточке</button>
     </div>
   </section>
 
@@ -1401,6 +1402,20 @@ function playTape(){
 playBtn.addEventListener("click", playTape);
 document.getElementById("clear").addEventListener("click", function(){
   dropQueue(); stopPlay(); seedTape(); schedulePreview();
+});
+
+/* Плавный переход к блоку с учётом закреплённой шапки: без вычета её высоты
+   цель уезжает под шапку. */
+function scrollToEl(el){
+  if(!el) return;
+  var nav = document.querySelector(".top");
+  var off = nav ? nav.offsetHeight + 10 : 0;
+  var y = el.getBoundingClientRect().top + window.scrollY - off;
+  if(y < 0) y = 0;
+  try{ window.scrollTo({ top:y, behavior:"smooth" }); }catch(e){ window.scrollTo(0, y); }
+}
+document.getElementById("toCard").addEventListener("click", function(){
+  scrollToEl(document.querySelector(".mintbox"));
 });
 
 /* ---------------- мини-редактор ленты ----------------
@@ -2555,7 +2570,10 @@ function playFromBytes(bytes){
 
 cardPlayBtn.addEventListener("click", function(){
   if(playing){ stopPlay(); return; }
-  if(current) playFromBytes(current.bytes);
+  if(!current) return;
+  /* Сразу видно, как поют: уводим взгляд к пушистикам, пока играет песня. */
+  scrollToEl(glade);
+  playFromBytes(current.bytes);
 });
 
 techBtn.addEventListener("click", function(){
