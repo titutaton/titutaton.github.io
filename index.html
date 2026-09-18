@@ -2942,6 +2942,10 @@ function route(){
     return;
   }
   showView("main");
+  /* Пришли на карточку (ссылка или «Миксовать») — объяснение ни к чему:
+     прячем баннер. Вернётся, когда адрес снова станет просто главной. */
+  var banner = document.querySelector(".banner");
+  if(banner) banner.hidden = /[#&](nft|s)=/.test(hash);
   openFromHash();
 }
 window.TTN_ROUTE = route;
