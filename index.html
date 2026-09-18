@@ -2694,8 +2694,10 @@ function openFromHash(){
 
     showCard(c);
     if(enjoy) document.body.classList.add("enjoy");
+    /* «Слушать» и «Миксовать» — это действия просмотра; в чеканке им нечего
+       делать (лента и так играет черновик). Обе кнопки принадлежат enjoy. */
     mixBtn.hidden = !enjoy;
-    cardPlayBtn.hidden = false;
+    cardPlayBtn.hidden = !enjoy;
     cardState.textContent = tokenId ? "#" + tokenId + " по ссылке" : "по ссылке";
     tapeInfo.textContent = (tokenId ? "карточка #" + tokenId : "карточка по ссылке") +
       " · " + c.song.bpm + " уд/мин" +
