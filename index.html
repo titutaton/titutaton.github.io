@@ -92,10 +92,16 @@ body{
 }
 
 /* ---------- шапка ---------- */
-.banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.banner{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
 /* display:flex выше перебивает браузерное [hidden]{display:none}, поэтому
    прятанье баннера (при заходе на карточку) задаём явно. */
 .banner[hidden]{display:none}
+.banner-x{
+  position:absolute;top:0;right:0;appearance:none;border:0;background:none;
+  color:var(--ink-soft);font:inherit;font-size:22px;line-height:1;cursor:pointer;
+  padding:2px 9px;border-radius:999px;opacity:.6;
+}
+.banner-x:hover{opacity:1;color:var(--ink)}
 .eyebrow{
   margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:clamp(10px,2.6vw,12px);
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -747,6 +753,7 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
     <p class="eyebrow">Семь нот на четверых</p>
     <h1>Пушистые мохоседы</h1>
     <p class="lede">Живут на моховой кочке и делят гамму по-честному: каждому свой слог и свои ноты. Ткните любого — споёт. Ткните всех подряд, слева направо, — получится их имя, и над кочкой взойдёт светило. Лента внизу запомнит и слоги, и ваш темп с паузами, а потом отыграет всё обратно.</p>
+    <button class="banner-x" id="bannerX" type="button" aria-label="Скрыть объяснение">×</button>
   </header>
 
   <div class="glade" id="glade">
@@ -2931,6 +2938,24 @@ function showView(name){
 /* Маршрут: хэш говорит, какой вид показать. #view=gallery[&mine=1][&q=…] —
    галерея; #s=/#nft= или пусто — главная. Оба вида в одном документе,
    поэтому переход между ними ничего не перезагружает и не теряет. */
+/* Баннер-объяснение можно закрыть крестиком; выбор запоминаем в localStorage
+   и уважаем при каждом заходе, пока человек не очистит данные сайта. */
+var bannerEl = document.querySelector(".banner");
+var bannerOff = false;
+try{ bannerOff = localStorage.getItem("ttn:banner") === "off"; }catch(e){}
+function applyBanner(isCard){
+  if(bannerEl) bannerEl.hidden = isCard || bannerOff;
+}
+(function(){
+  var x = document.getElementById("bannerX");
+  if(!x) return;
+  x.addEventListener("click", function(){
+    bannerOff = true;
+    if(bannerEl) bannerEl.hidden = true;
+    try{ localStorage.setItem("ttn:banner", "off"); }catch(e){}
+  });
+})();
+
 function route(){
   var hash = location.hash || "";
   if(/^#?view=gallery\b/.test(hash)){
@@ -2947,8 +2972,7 @@ function route(){
   showView("main");
   /* Пришли на карточку (ссылка или «Миксовать») — объяснение ни к чему:
      прячем баннер. Вернётся, когда адрес снова станет просто главной. */
-  var banner = document.querySelector(".banner");
-  if(banner) banner.hidden = /[#&](nft|s)=/.test(hash);
+  applyBanner(/[#&](nft|s)=/.test(hash));
   openFromHash();
 }
 window.TTN_ROUTE = route;
