@@ -23,6 +23,7 @@
   --moss:#6E9A63;
 
   --accent:#D9426D;
+  --night:#0B0F22;
   --eye:#2B2333;
   --eye-shine:#FFFFFF;
   --mouth:#6B2440;
@@ -74,6 +75,7 @@ html{scrollbar-gutter:stable}
 body{
   overflow-x:clip;
   margin:0;
+  min-height:100vh;
   background:
     radial-gradient(900px 420px at 12% -8%, var(--ground-2), transparent 70%),
     radial-gradient(700px 380px at 92% 4%, var(--ground-2), transparent 65%),
@@ -299,7 +301,7 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
   position:sticky;top:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   margin:calc(-1 * var(--py)) calc(-1 * var(--px)) clamp(10px,3vw,22px);
-  padding:calc(var(--py) * .5) var(--px) 10px;
+  padding:clamp(8px,2vw,16px) var(--px) 10px;
   background:var(--ground);
   /* Без backdrop-filter: размытие фона под закреплённой шапкой GPU
      пересчитывает каждый кадр прокрутки. Плотность поднята, чтобы текст
@@ -659,18 +661,85 @@ kbd{
    blink/bob иначе держат GPU занятым даже в свёрнутом окне. !important —
    потому что .critter.singing .bob перебивает animation-play-state. */
 html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
+/* ================= галерея — вид внутри той же страницы (SPA) =================
+   Те же правила, что были на отдельной gallery.html, но с префиксом #viewGallery
+   (ничего не протекает на главную). Классы .card/.body/.name переименованы в
+   .gcard/.gbody/.gname: иначе их подхватили бы глобальные правила главной. */
+#viewGallery .bar{
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:12px clamp(12px,3vw,18px);backdrop-filter:blur(6px);
+}
+#viewGallery .tabs{display:flex;gap:4px;background:var(--ground-2);border-radius:999px;padding:3px}
+#viewGallery .tab{
+  appearance:none;border:0;background:none;font:inherit;font-weight:800;font-size:13.5px;
+  color:var(--ink-soft);padding:7px 15px;border-radius:999px;cursor:pointer;
+}
+#viewGallery .tab[aria-selected="true"]{background:var(--accent);color:var(--ground)}
+#viewGallery .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#viewGallery .tab:disabled,#viewGallery .find:disabled{opacity:.5;cursor:default}
+#viewGallery .find{
+  flex:1 1 220px;min-width:0;font:inherit;font-size:14px;color:var(--ink);
+  background:var(--ground-2);border:1px solid var(--line);border-radius:999px;padding:9px 16px;
+}
+#viewGallery .find:focus{outline:2px solid var(--accent);outline-offset:1px}
+#viewGallery .reload{
+  appearance:none;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer;
+  color:var(--ink);background:none;border:2px solid var(--line);border-radius:999px;
+  padding:8px 15px;white-space:nowrap;
+}
+#viewGallery .reload:hover{border-color:var(--accent);color:var(--accent)}
+#viewGallery .reload:disabled{opacity:.5;cursor:default}
+#viewGallery .state{
+  margin:14px 0 0;text-align:center;color:var(--ink-soft);
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.04em;
+}
+#viewGallery .grid{margin:18px 0 0;display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+#viewGallery .gcard{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  overflow:hidden;display:flex;flex-direction:column;
+}
+#viewGallery .gcard .pic{display:block;line-height:0}
+#viewGallery .gcard img{display:block;width:100%;height:auto;background:var(--night)}
+#viewGallery .gbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+#viewGallery .gname{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:17px}
+#viewGallery .traits{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+#viewGallery .fact{
+  display:flex;flex-direction:column;gap:1px;padding:5px 10px;border-radius:10px;
+  background:var(--ground-2);border:1px solid var(--line);min-width:0;
+  text-decoration:none;color:inherit;cursor:pointer;user-select:none;
+}
+#viewGallery .fact:hover{border-color:var(--accent)}
+#viewGallery .fact.rare .fact-type,#viewGallery .fact.rare .fact-value{color:var(--accent)}
+#viewGallery .fact-type{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;
+}
+#viewGallery .fact-value{font-size:12.5px;color:var(--ink);white-space:nowrap}
+#viewGallery .more{
+  display:block;margin:26px auto 0;padding:11px 22px;border-radius:999px;
+  border:2px solid var(--line);background:none;color:var(--ink);font:inherit;font-weight:800;cursor:pointer;
+}
+#viewGallery .more[hidden]{display:none}
+#viewGallery .more:hover{border-color:var(--accent);color:var(--accent)}
+#viewGallery footer{margin:30px 0 0;text-align:center;color:var(--ink-soft);font-size:12.5px}
+#viewGallery .foot-lede{margin:0 auto 8px;max-width:70ch;color:var(--ink-soft);text-wrap:pretty}
+#viewGallery footer a{color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 </style>
 
 <div class="page">
   <nav class="top">
-    <a class="brand" href="./"><span class="s">Ти</span><span class="s">ту</span><span class="s">та</span><span class="s">тон</span></a>
+    <a class="brand" href="#view=main"><span class="s">Ти</span><span class="s">ту</span><span class="s">та</span><span class="s">тон</span></a>
     <div class="top-right">
-      <a class="navlink" href="gallery.html">Галерея</a>
-      <a class="navlink" href="gallery.html?mine=1">Мои</a>
+      <a class="navlink" href="#view=main">Зверята</a>
+      <a class="navlink" href="#view=gallery">Галерея</a>
+      <a class="navlink" href="#view=gallery&mine=1">Мои</a>
       <button class="wallet" id="walletBtn" type="button">Подключить кошелёк</button>
     </div>
   </nav>
 
+  <div class="view" id="viewMain">
   <header class="banner">
     <p class="eyebrow">Семь нот на четверых</p>
     <h1>Пушистые мохоседы</h1>
@@ -703,7 +772,7 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
       <div class="card-hold" id="cardHold"></div>
       <div class="mint-side">
         <div class="gg-preview">
-          <a class="gg-collection" href="gallery.html">Коллекция Титутатон</a>
+          <a class="gg-collection" href="#view=gallery">Коллекция Титутатон</a>
           <p class="gg-eyebrow">Предпросмотр описания и атрибутов</p>
           <div id="ggOut"></div>
         </div>
@@ -725,6 +794,22 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
   <div class="dossier" id="dossier"></div>
 
   <p class="footnote">Клавиши <kbd>1</kbd>–<kbd>9</kbd> — это ноты, все девять: цифра написана прямо на точке. У малышей по две ноты, у Тонтона одна до в трёх октавах — вместе вся гамма. <kbd>0</kbd> проигрывает ленту. Точки — тоже инструмент: выбирают ноту и сразу поют, попадая в ленту. Быстрее, чем лента умеет запоминать, сыграть не выйдет: торопливые нажатия становятся перебором — ровно тем, что потом прозвучит с карточки. Чем ниже поёт квартет, тем темнее небо на карточке.</p>
+  </div>
+
+  <div class="view" id="viewGallery" hidden>
+    <h1 class="sr-only">Отчеканенные песни</h1>
+    <div class="bar">
+      <input class="find" id="find" type="search" placeholder="Номер, редкость или зверь — например, 12 или зеркальная" aria-label="Поиск по карточкам">
+      <button class="reload" id="refresh" type="button" title="Перечитать коллекцию с чейна">Обновить</button>
+    </div>
+    <p class="state" id="state">спрашиваем у чейна…</p>
+    <div class="grid" id="grid"></div>
+    <button class="more" id="more" hidden>Показать ещё</button>
+    <footer>
+      <p class="foot-lede">Отчеканенные песни: каждую карточку нарисовал контракт из байтов её песни — и каждую можно послушать.</p>
+      <p id="foot"></p>
+    </footer>
+  </div>
 </div>
 
 <!-- Техническая информация — по клику, отдельным окном: в самой карточке
@@ -758,7 +843,7 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
   var CFG = window.TTN_NET || {};
   var ref = document.referrer || "";
   if(!/^https?:\/\/([a-z0-9-]+\.)?getgems\.io\//i.test(ref)) return;
-  if(/[#&]nft=|[#&]s=/.test(location.hash || "")) return;
+  if(/[#&]nft=|[#&]s=|view=gallery/.test(location.hash || "")) return;
 
   /* Сравнивать адреса строками нельзя: EQ…/kQ…/0Q… — один и тот же адрес
      с разными тегом сети и crc16. Берём рабочую цепочку и 32-байтовый хеш. */
@@ -783,7 +868,7 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
     location.replace(location.pathname + location.search + "#nft=" + item[1] + "&enjoy=1");
     return;
   }
-  location.replace("gallery.html?mine=1");
+  location.replace(location.pathname + location.search + "#view=gallery&mine=1");
 })();
 </script>
 <script>
@@ -817,9 +902,9 @@ var CAST = [
     formants:[700,1220,2600], dur:.54, ears:"tuft", seed:37,
     habit:"после ноты обязательно подпрыгивает" },
   { id:"ton", syl:"ТОН", name:"Тонтон", species:"мохосед-старейшина",
-    about:"Главный. Тёмный, тяжёлый, на макушке настоящий мох — так стар, что оброс. Нота у него одна на всех — до, та самая, на которую садится вся фраза. Точками выбирается октава; обычно сидит на нижней, до₃. Чем ниже он забирается, тем темнее небо на карточке.",
+    about:"Главный. Тёмный, тяжёлый, на макушке настоящий мох — так стар, что оброс. Нота у него одна на всех — до, та самая, на которую садится вся фраза. Точками выбирается октава, от до₃ до до₅. Чем ниже он забирается, тем темнее небо на карточке.",
     notes:[{n:"до₅",f:523.25,rank:0},{n:"до₄",f:261.63,rank:0},{n:"до₃",f:130.81,rank:0}],
-    start:2, pick:"октава",
+    start:0, pick:"октава",
     formants:[500,900,2400], dur:.9, ears:"round", seed:53,
     habit:"вступает последним и закрывает песню" }
 ];
@@ -2374,7 +2459,7 @@ function ggPreview(c){
        «Примет» поиск умеет значение и без имени типа, у остальных —
        строку «тип: значение» (так их склеивает traitsOf). */
     var q = a.trait_type === "Приметы" ? a.value : a.trait_type + ": " + a.value;
-    return '<a class="' + cls + '" href="gallery.html?q=' + encodeURIComponent(q) + '">' +
+    return '<a class="' + cls + '" href="#view=gallery&q=' + encodeURIComponent(q) + '">' +
       '<span class="gg-trait-type">' + a.trait_type + '</span>' +
       '<span class="gg-trait-value">' + a.value + '</span></a>';
   }).join("");
@@ -2833,8 +2918,35 @@ function openFromHash(){
 /* Открываем и по загрузке, и когда хэш меняют на уже открытой странице:
    «Просмотреть на сайте» в окне после минта — это тот же #s=…, и без
    подписки на hashchange кнопка бы только меняла адрес, ничего не показывая. */
-openFromHash();
-window.addEventListener("hashchange", openFromHash);
+function showView(name){
+  var m = document.getElementById("viewMain");
+  var g = document.getElementById("viewGallery");
+  if(m) m.hidden = name !== "main";
+  if(g) g.hidden = name !== "gallery";
+}
+
+/* Маршрут: хэш говорит, какой вид показать. #view=gallery[&mine=1][&q=…] —
+   галерея; #s=/#nft= или пусто — главная. Оба вида в одном документе,
+   поэтому переход между ними ничего не перезагружает и не теряет. */
+function route(){
+  var hash = location.hash || "";
+  if(/^#?view=gallery\b/.test(hash)){
+    showView("gallery");
+    if(window.TTN_GALLERY){
+      var qm = /[#&]q=([^&]*)/.exec(hash);
+      window.TTN_GALLERY.route({
+        mine: /[#&]mine=1\b/.test(hash),
+        q: qm ? decodeURIComponent(qm[1].replace(/\+/g, " ")) : null
+      });
+    }
+    return;
+  }
+  showView("main");
+  openFromHash();
+}
+window.TTN_ROUTE = route;
+route();
+window.addEventListener("hashchange", route);
 
 /* Шов для проверки паритета с контрактом: те же функции будут вызваны
    из теста рядом с get-методом в @ton/sandbox, и SVG обязан совпасть побайтово. */
@@ -2854,5 +2966,282 @@ document.addEventListener("keydown", function(e){
   strike(KEYS[k].s, KEYS[k].i);
   nodes[KEYS[k].s.id].focus();
 });
+})();
+</script>
+<script>
+/* ================= вид «галерея» =================
+   Тот же код, что был на отдельной gallery.html, только без своей шапки и
+   кошелька (они теперь общие на весь документ) и со ссылками на hash-
+   маршруты. Инициализируется лениво: первый заход на #view=gallery. */
+(function(){
+"use strict";
+
+var CFG = window.TTN_NET || {};
+var COLLECTION = CFG.COLLECTION || "";
+var BATCH = 20;
+
+var grid = document.getElementById("grid");
+if(!grid) return;                          /* вида нет — делать нечего */
+var state = document.getElementById("state");
+var more = document.getElementById("more");
+var foot = document.getElementById("foot");
+var find = document.getElementById("find");
+var refresh = document.getElementById("refresh");
+
+var mode = "all";
+var cards = [], total = 0, taken = 0, busy = false, done = false;
+var started = false;
+
+/* Кэш на время визита: у «Все» и «Мои» свои списки, и переключение вкладок
+   в SPA вообще не должно ходить в сеть. В хранилище ничего не кладём. */
+var cache = { all: null, mine: null };
+function saveCache(){
+  cache[mode] = { cards: cards.slice(), total: total, taken: taken, done: done };
+}
+function restoreCache(to){
+  var s = cache[to];
+  if(!s) return false;
+  cards = s.cards.slice();
+  total = s.total;
+  taken = s.taken;
+  done = s.done;
+  return true;
+}
+
+function say(s){ state.textContent = s; }
+
+function traitsOf(meta){
+  var attrs = (meta && meta.attributes) || [], traits = [];
+  for(var i = 0; i < attrs.length; i++){
+    var a = attrs[i];
+    traits.push({ type: a.trait_type, value: String(a.value), rare: a.trait_type === "Приметы" });
+  }
+  return traits;
+}
+
+function imageOf(meta){
+  /* Один индексатор отдаёт image_data уже в base64, другой — сырым SVG;
+     различаем по первому символу, а не по вере в документацию. */
+  var d = meta.image_data;
+  if(d) return "data:image/svg+xml;base64," + (d.charAt(0) === "<"
+    ? btoa(unescape(encodeURIComponent(d))) : d);
+  return meta.image || "";
+}
+
+function cardOf(item){
+  var meta = item.metadata || {};
+  var t = traitsOf(meta);
+  return {
+    address: item.address,
+    name: meta.name || "Титутатон",
+    image: imageOf(meta),
+    traits: t,
+    search: ((meta.name || "") + " " +
+      t.map(function(x){ return x.type + ": " + x.value; }).join(" ")).toLowerCase(),
+  };
+}
+
+function nodeOf(c){
+  var el = document.createElement("article");
+  el.className = "gcard";
+
+  /* Картинка — тот же переход «слушать»: по ней кликают чаще, чем по кнопке. */
+  var img = document.createElement("img");
+  img.loading = "lazy";
+  img.alt = c.name;
+  if(c.image) img.src = c.image;
+  var pic = document.createElement("a");
+  pic.className = "pic";
+  pic.href = "#nft=" + c.address + "&enjoy=1";
+  pic.setAttribute("aria-label", c.name + " — слушать");
+  pic.appendChild(img);
+  el.appendChild(pic);
+
+  var body = document.createElement("div");
+  body.className = "gbody";
+
+  var h = document.createElement("p");
+  h.className = "gname";
+  h.textContent = c.name;
+  body.appendChild(h);
+
+  if(c.traits.length){
+    var f = document.createElement("div");
+    f.className = "traits";
+    c.traits.forEach(function(x){
+      var s = document.createElement("a");
+      s.className = "fact" + (x.rare ? " rare" : "");
+      s.href = "#view=gallery&q=" + encodeURIComponent(x.type + ": " + x.value);
+      var ty = document.createElement("span");
+      ty.className = "fact-type";
+      ty.textContent = x.type;
+      var va = document.createElement("span");
+      va.className = "fact-value";
+      va.textContent = x.value;
+      s.appendChild(ty);
+      s.appendChild(va);
+      f.appendChild(s);
+    });
+    body.appendChild(f);
+  }
+
+  el.appendChild(body);
+  return el;
+}
+
+function redraw(){
+  var query = find.value.trim().toLowerCase().replace(/^#/, "");
+  grid.textContent = "";
+  var shown = 0;
+  cards.forEach(function(c){
+    if(query && c.search.indexOf(query) < 0) return;
+    grid.appendChild(nodeOf(c));
+    shown++;
+  });
+  if(query) say(shown ? "Нашлось: " + shown : "Ничего не нашлось — попробуйте номер или редкость");
+  else summary();
+}
+
+function summary(){
+  if(mode === "mine"){
+    say(cards.length ? "Ваших карточек: " + cards.length : "У этого кошелька карточек пока нет");
+    return;
+  }
+  if(!cards.length){ say("Пока ни одной песни. Первая — ваша."); return; }
+  say("Карточек: " + cards.length + (done ? "" : " · есть ещё"));
+}
+
+function fetchTotal(){
+  return fetch(CFG.API + "/nfts/collections/" + COLLECTION)
+    .then(function(r){ if(!r.ok) throw new Error("коллекция не отвечает (" + r.status + ")"); return r.json(); })
+    .then(function(j){ total = j.next_item_index || 0; });
+}
+
+function loadAll(){
+  var first = total ? Promise.resolve() : fetchTotal();
+  return first.then(function(){
+    if(!total){ more.hidden = true; summary(); return; }
+    var take = Math.min(BATCH, total - taken);
+    if(done || take <= 0){ more.hidden = true; return; }
+    var offset = total - taken - take;
+    say(taken ? "читаем дальше…" : "спрашиваем у чейна…");
+
+    return fetch(CFG.API + "/nfts/collections/" + COLLECTION + "/items?limit=" + take + "&offset=" + offset)
+      .then(function(r){ if(!r.ok) throw new Error("чейн ответил " + r.status); return r.json(); })
+      .then(function(j){
+        var list = (j.nft_items || []).slice().reverse();
+        list.forEach(function(it){ cards.push(cardOf(it)); });
+        taken += list.length;
+        done = list.length < take || taken >= total;
+        more.hidden = done;
+        redraw();
+        saveCache();
+      });
+  });
+}
+
+function loadMine(){
+  var who = window.Wallet ? window.Wallet.address() : null;
+  if(!COLLECTION){
+    more.hidden = true;
+    say("Коллекция ещё не развёрнута. Когда появится — карточки будут здесь.");
+    return Promise.resolve();
+  }
+  if(!who){
+    more.hidden = true;
+    say("Чтобы увидеть свои карточки, подключите кошелёк — кнопка справа вверху.");
+    return Promise.resolve();
+  }
+  say("смотрим ваши…");
+  return fetch(CFG.API + "/accounts/" + who + "/nfts?collection=" + COLLECTION + "&limit=1000&offset=0")
+    .then(function(r){ if(!r.ok) throw new Error("чейн ответил " + r.status); return r.json(); })
+    .then(function(j){
+      cards = (j.nft_items || []).slice()
+        .sort(function(a, b){ return (b.index || 0) - (a.index || 0); })
+        .map(cardOf);
+      done = true;
+      more.hidden = true;
+      redraw();
+      saveCache();
+    });
+}
+
+function loadMore(){
+  if(busy) return;
+  busy = true;
+  more.disabled = true;
+  refresh.disabled = true;
+  (mode === "mine" ? loadMine() : loadAll())
+    .catch(function(e){ say("Не получилось прочитать коллекцию: " + e.message); })
+    .then(function(){ busy = false; more.disabled = false; refresh.disabled = false; });
+}
+
+function reloadAll(){
+  if(busy) return;
+  cache.all = null;
+  cache.mine = null;
+  total = 0;
+  cards = [];
+  taken = 0;
+  done = false;
+  grid.textContent = "";
+  more.hidden = true;
+  loadMore();
+}
+
+function switchTo(to){
+  if(mode === to) return;
+  mode = to;
+  grid.textContent = "";
+  if(restoreCache(to)){
+    redraw();
+    more.hidden = (to === "mine") || done;
+    return;
+  }
+  cards = [];
+  total = 0;
+  taken = 0;
+  done = false;
+  more.hidden = true;
+  loadMore();
+}
+
+function init(){
+  started = true;
+  if(COLLECTION){
+    foot.innerHTML = 'Коллекция целиком: <a href="' + CFG.MARKET + COLLECTION +
+      '" target="_blank" rel="noopener">на маркетплейсе</a>';
+  } else {
+    say("Коллекция ещё не развёрнута. Когда появится — карточки будут здесь.");
+    find.disabled = true;
+    refresh.disabled = true;
+  }
+  if(window.Wallet) window.Wallet.on(function(account){
+    /* Подключился/сменился кошелёк, а мы смотрим «мои» — список устарел */
+    if(mode !== "mine") return;
+    cache.mine = null;
+    cards = [];
+    grid.textContent = "";
+    if(account) loadMore(); else redraw();
+  });
+  more.addEventListener("click", loadMore);
+  refresh.addEventListener("click", reloadAll);
+  find.addEventListener("input", redraw);
+}
+
+/* Зовётся роутером при каждом заходе на #view=gallery (и при смене
+   mine/q в адресе). Первый заход настраивает и грузит, дальше — из кэша. */
+function galRoute(p){
+  if(!started) init();
+  if(p && p.q != null) find.value = p.q;
+  var want = p && p.mine ? "mine" : "all";
+  if(want !== mode) switchTo(want);
+  else if(cards.length || !COLLECTION) redraw();
+  else if(!busy && COLLECTION) loadMore();
+}
+window.TTN_GALLERY = { route: galRoute };
+
+/* Роутер главной уже готов к этому моменту — пусть прогонит текущий адрес. */
+if(window.TTN_ROUTE) window.TTN_ROUTE();
 })();
 </script>
