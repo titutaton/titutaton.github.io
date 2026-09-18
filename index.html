@@ -476,8 +476,9 @@ body.enjoy .gg-collection{display:inline-block}
 /* Карточка черновика — тем же двухколоночным видом, что и просмотр: слева
    большая картинка, справа имя, описание, трейты и органы управления. */
 .mintbox{
+  --cardw:min(680px, calc((100vh - 200px) * 0.7143));
   margin-top:16px;display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(300px,.9fr);
+  grid-template-columns:minmax(0, var(--cardw)) minmax(320px, 1fr);
   gap:clamp(16px,3vw,32px) 14px;align-items:start;
   background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(13px,3vw,22px);backdrop-filter:blur(6px);
@@ -509,7 +510,10 @@ body.enjoy .gg-collection{display:inline-block}
 .thanks a{color:var(--accent)}
 @keyframes thanksIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ .thanks{animation:none} }
-.card-hold{border-radius:16px;overflow:hidden;box-shadow:0 10px 28px var(--shadow);line-height:0;min-width:0;max-width:100%}
+/* Карточка 1000×1400, и на широком экране её ширина ограничена ещё и
+   высотой экрана, чтобы влезала целиком: ≤ (100vh − запас) × 5/7. Колонка
+   слева растёт ровно под карточку, пустого места не остаётся. */
+.card-hold{border-radius:16px;overflow:hidden;box-shadow:0 10px 28px var(--shadow);line-height:0;min-width:0;width:100%;max-width:var(--cardw,100%);justify-self:center}
 .card-hold svg{width:100%;max-width:100%;height:auto;display:block}
 .specs{
   margin:0 0 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;
@@ -525,7 +529,7 @@ body.enjoy .gg-collection{display:inline-block}
   white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);
 }
 @media (max-width:760px){
-  .mintbox{grid-template-columns:1fr}
+  .mintbox{grid-template-columns:1fr;--cardw:100%}
   .mintbox > .console-head{grid-column:1;grid-row:1}
   .card-hold{grid-column:1;grid-row:2}
   .gg-preview{grid-column:1;grid-row:3}
