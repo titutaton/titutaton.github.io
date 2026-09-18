@@ -172,7 +172,16 @@ h1{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:clamp(
 .name{margin:0;font-family:"Podkova",Georgia,serif;font-weight:800;font-size:17px}
 .rare{display:flex;flex-wrap:wrap;gap:6px;margin:0}
 .rare span{font-size:11px;padding:3px 9px;border-radius:999px;background:var(--ground-2);color:var(--accent)}
-.facts{margin:0;color:var(--ink-soft);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.fact{
+  display:flex;flex-direction:column;gap:1px;padding:5px 10px;border-radius:10px;
+  background:var(--ground-2);border:1px solid var(--line);min-width:0;
+}
+.fact-type{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;
+}
+.fact-value{font-size:12.5px;color:var(--ink);white-space:nowrap}
 .desc{
   margin:0;color:var(--ink-soft);font-size:12.5px;line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
@@ -271,9 +280,9 @@ function traitsOf(meta){
   for(var i = 0; i < attrs.length; i++){
     var a = attrs[i];
     if(a.trait_type === "Приметы") rare.push(String(a.value));
-    else facts.push(a.trait_type + ": " + a.value);
+    else facts.push({ type: a.trait_type, value: String(a.value) });
   }
-  return { rare: rare, facts: facts.join(" · ") };
+  return { rare: rare, facts: facts };
 }
 
 function imageOf(meta){
@@ -294,7 +303,8 @@ function cardOf(item){
     image: imageOf(meta),
     rare: t.rare,
     facts: t.facts,
-    search: ((meta.name || "") + " " + t.rare.join(" ") + " " + t.facts).toLowerCase(),
+    search: ((meta.name || "") + " " + t.rare.join(" ") + " " +
+      t.facts.map(function(x){ return x.type + ": " + x.value; }).join(" ")).toLowerCase(),
   };
 }
 
@@ -335,10 +345,22 @@ function nodeOf(c){
     body.appendChild(r);
   }
 
-  if(c.facts){
-    var f = document.createElement("p");
+  if(c.facts.length){
+    var f = document.createElement("div");
     f.className = "facts";
-    f.textContent = c.facts;
+    c.facts.forEach(function(x){
+      var s = document.createElement("span");
+      s.className = "fact";
+      var ty = document.createElement("span");
+      ty.className = "fact-type";
+      ty.textContent = x.type;
+      var va = document.createElement("span");
+      va.className = "fact-value";
+      va.textContent = x.value;
+      s.appendChild(ty);
+      s.appendChild(va);
+      f.appendChild(s);
+    });
     body.appendChild(f);
   }
 
