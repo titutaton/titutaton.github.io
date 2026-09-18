@@ -84,7 +84,7 @@ body{
   line-height:1.55;
   -webkit-text-size-adjust:100%;
 }
-.page{max-width:1020px;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(12px,3vw,28px) 48px;}
+.page{max-width:none;margin:0 auto;padding:clamp(16px,4vw,44px) clamp(16px,4vw,72px) 48px;}
 
 /* ---------- шапка ---------- */
 .banner{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
@@ -114,7 +114,7 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
    высота идёт за шириной сама. */
 .mound{
   position:absolute;left:0;right:0;bottom:-70px;z-index:0;pointer-events:none;line-height:0;
-  height:calc(clamp(150px,20vw,220px) + 70px);
+  height:calc(clamp(150px,20vw,360px) + 70px);
   border-radius:22px 22px 0 0;overflow:hidden;   /* тот же скруглённый край, что у панелей ниже */
 }
 .mound svg{display:block;width:100%;height:100%}
@@ -134,10 +134,13 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .critter svg{display:block;width:var(--w);max-width:100%;height:auto;margin:0 auto;overflow:visible}
 
 .seat{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;width:100%}
-.seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--w:clamp(60px,19vw,168px);margin-bottom:6px}
-.seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--w:clamp(64px,20vw,176px);margin-bottom:24px}
-.seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--w:clamp(62px,19.5vw,172px);margin-bottom:10px}
-.seat[data-id="ton"]{--c:var(--ton);--c-deep:var(--ton-deep);--c-soft:var(--ton-soft);--w:clamp(96px,29vw,252px)}
+/* Коэффициенты vw подобраны так, чтобы на прежней ширине страницы (1020)
+   пушистики были того же размера; дальше, на широком экране, растут вместе
+   с местом, пока не упрутся в свой потолок или в ширину колонки. */
+.seat[data-id="ti"]{--c:var(--ti);--c-deep:var(--ti-deep);--c-soft:var(--ti-soft);--w:clamp(60px,16.5vw,300px);margin-bottom:6px}
+.seat[data-id="tu"]{--c:var(--tu);--c-deep:var(--tu-deep);--c-soft:var(--tu-soft);--w:clamp(64px,17.25vw,315px);margin-bottom:24px}
+.seat[data-id="ta"]{--c:var(--ta);--c-deep:var(--ta-deep);--c-soft:var(--ta-soft);--w:clamp(62px,16.9vw,305px);margin-bottom:10px}
+.seat[data-id="ton"]{--c:var(--ton);--c-deep:var(--ton-deep);--c-soft:var(--ton-soft);--w:clamp(96px,24.7vw,440px)}
 
 .body{fill:var(--c)}
 .belly{fill:var(--c-soft);opacity:.85}
@@ -407,6 +410,19 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 @keyframes drop{from{opacity:0;transform:translateY(-10px) scale(.8)}to{opacity:1;transform:none}}
 
 .controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+/* Кнопки карточки — одного размера, в два столбца: «Слушать» и «Миксовать»
+   не разъезжаются по ширине. Длинная подпись переносится, а не растягивает
+   соседку; высота в ряду выравнивается grid-ом. */
+.mint-side .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.mint-side .controls .btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;text-align:center;padding-left:10px;padding-right:10px;
+}
+/* Длинные подписи — чеканка и техническая кнопка — на всю ширину, а
+   «Слушать» с «Миксовать» делят ряд поровну. */
+#mintBtn{grid-column:1 / -1}
+#techBtn{grid-column:1 / -1}
+.tech{margin:0 0 4px}
 .btn{
   appearance:none;font:inherit;font-weight:800;cursor:pointer;
   padding:11px 18px;border-radius:999px;border:2px solid var(--ink);
@@ -423,14 +439,14 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 .btn:focus-visible{outline:3px dashed var(--accent);outline-offset:3px}
 /* Кнопки проигрывания не прыгают в ширине, когда длинное
    «Проиграть…» становится коротким «Стоп». */
-#play, #cardPlayBtn{min-width:12.5em;max-width:100%}
+#play{min-width:12.5em;max-width:100%}
 
 /* ============ премиальный просмотр (enjoy) — как страница NFT ============
-   ?enjoy в адресе рядом с #s=/#nft=. Слева большая картинка, справа
-   коллекция, имя, описание и трейты плашками; снизу две кнопки. Лента
-   наверху работает плеером, но не редактором: правка тут выключена.
-   Зверята убраны — это карточка, а не инструмент; вернуться к игре можно
-   кнопкой «Миксовать». Автостарта нет: браузеры режут звук без жеста. */
+   ?enjoy в адресе рядом с #s=/#nft=. Раскладка та же двухколоночная, что и
+   у черновика (см. .mintbox ниже); здесь лишь убрано всё рабочее —
+   объяснения, чеканка, метаданные и правка ленты. Пушистики остаются
+   сверху и поют, но в просмотре по ним не тыкают: иначе черновик вернётся
+   и вытеснит чужую карточку. Автостарта нет — звук режет жест. */
 body.enjoy .banner,
 body.enjoy .dossier,
 body.enjoy .footnote,
@@ -439,30 +455,14 @@ body.enjoy #mintNote,
 body.enjoy #thanks,
 body.enjoy #play,
 body.enjoy #clear,
-body.enjoy .specs,
-body.enjoy #metaBtn,
+body.enjoy #tech,
+body.enjoy #techBtn,
 body.enjoy .gg-eyebrow{display:none}
-/* Пушистиков не убираем — они поют. Но в просмотре их не тыкают: иначе
-   черновик вернётся и вытеснит чужую карточку. */
 body.enjoy #glade{pointer-events:none}
 body.enjoy #glade .lvl{pointer-events:none}
-/* В просмотре лента — не редактор: правка выключена, ручки не тыкаются. */
 body.enjoy .chip.can-edit,body.enjoy .rest.can-edit{cursor:default}
 body.enjoy .chip.can-edit:hover,body.enjoy .rest.can-edit:hover{outline:none}
-
-body.enjoy .mintbox{
-  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(290px,.95fr);
-  gap:clamp(16px,3vw,36px);align-items:start;
-  margin-top:14px;background:none;border:0;border-radius:0;padding:0;backdrop-filter:none;
-}
 body.enjoy .mintbox > .console-head{display:none}
-body.enjoy .mint-grid{display:contents}
-body.enjoy .card-hold{grid-column:1;grid-row:1 / span 2;max-width:none;margin:0}
-body.enjoy .gg-preview{grid-column:2;grid-row:1;margin:0;padding:0;border:0}
-body.enjoy .mint-side{grid-column:2;grid-row:2}
-body.enjoy #cardPlayBtn:not([hidden]){display:inline-block;font-size:1.15em;padding:.9em 1.8em}
-body.enjoy .controls{flex-direction:column;align-items:stretch}
-body.enjoy .controls .btn{width:100%;text-align:center}
 
 .gg-collection{
   display:none;margin:0 0 2px;color:var(--accent);text-decoration:none;
@@ -472,21 +472,25 @@ body.enjoy .controls .btn{width:100%;text-align:center}
 .gg-collection:hover{text-decoration:underline}
 body.enjoy .gg-collection{display:inline-block}
 
-@media (max-width:700px){
-  body.enjoy .mintbox{grid-template-columns:1fr}
-  body.enjoy .card-hold{grid-column:1;grid-row:1}
-  body.enjoy .gg-preview{grid-column:1;grid-row:2}
-  body.enjoy .mint-side{grid-column:1;grid-row:3}
-}
-
 /* ---------- карточка песни (прототип NFT) ---------- */
+/* Карточка черновика — тем же двухколоночным видом, что и просмотр: слева
+   большая картинка, справа имя, описание, трейты и органы управления. */
 .mintbox{
-  margin-top:16px;display:grid;gap:14px;
+  margin-top:16px;display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,.9fr);
+  gap:clamp(16px,3vw,32px) 14px;align-items:start;
   background:var(--card);border:1px solid var(--line);border-radius:22px;
   padding:clamp(13px,3vw,22px);backdrop-filter:blur(6px);
 }
 .mintbox > *, .console > *{min-width:0}
-.mint-grid{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:18px;align-items:start}
+.mintbox > .console-head{grid-column:1 / -1;grid-row:1}
+/* display:contents — чтобы card-hold и mint-side стали колонками самого
+   mintbox, а порядок задавали строки ниже: иначе mint-side, стоящий в
+   разметке раньше gg-preview, встал бы над трейтами. */
+.mint-grid{display:contents}
+.card-hold{grid-column:1;grid-row:2 / span 2}
+.gg-preview{grid-column:2;grid-row:2}
+.mint-side{grid-column:2;grid-row:3}
 /* Длинный hex песни в specs — без пробелов: без min-width:0 грид-элемент
    распирает колонку шире экрана, и вместе с ним уезжает и картинка. */
 .mint-grid > *, .mint-side{min-width:0;max-width:100%}
@@ -520,12 +524,18 @@ body.enjoy .gg-collection{display:inline-block}
   font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;line-height:1.5;
   white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);
 }
-@media (max-width:700px){ .mint-grid{grid-template-columns:1fr} }
+@media (max-width:760px){
+  .mintbox{grid-template-columns:1fr}
+  .mintbox > .console-head{grid-column:1;grid-row:1}
+  .card-hold{grid-column:1;grid-row:2}
+  .gg-preview{grid-column:1;grid-row:3}
+  .mint-side{grid-column:1;grid-row:4}
+}
 
 /* Предпросмотр «как на Getgems»: то же имя, описание и трейты, что уедут
    в get_nft_content, только не JSON-строкой, а плитками — примерно как их
    разложит сама витрина маркетплейса. */
-.gg-preview{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.gg-preview{margin:0;padding:0;border:0}
 .gg-eyebrow{
   margin:0 0 10px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
   letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -636,12 +646,15 @@ kbd{
     <div class="mint-grid">
       <div class="card-hold" id="cardHold"></div>
       <div class="mint-side">
-        <dl class="specs" id="specs"></dl>
+        <div class="tech" id="tech" hidden>
+          <dl class="specs" id="specs"></dl>
+          <pre class="meta" id="metaOut"></pre>
+        </div>
         <div class="controls">
           <button class="btn" id="mintBtn" type="button">Отчеканить</button>
           <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Слушать</button>
           <button class="btn ghost" id="mixBtn" type="button" hidden>Миксовать</button>
-          <button class="btn ghost" id="metaBtn" type="button" aria-expanded="false">Показать метаданные</button>
+          <button class="btn ghost" id="techBtn" type="button" aria-expanded="false">Показать техническую информацию</button>
         </div>
         <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
         <div class="thanks" id="thanks" hidden>
@@ -649,7 +662,6 @@ kbd{
           <p class="thanks-said">Пушистики кланяются и убегают петь дальше.</p>
           <p class="note" id="thanksLinks"></p>
         </div>
-        <pre class="meta" id="metaOut" hidden></pre>
       </div>
     </div>
 
@@ -2197,7 +2209,8 @@ var specsEl = document.getElementById("specs");
 var ggOut = document.getElementById("ggOut");
 var cardState = document.getElementById("cardState");
 var metaOut = document.getElementById("metaOut");
-var metaBtn = document.getElementById("metaBtn");
+var tech = document.getElementById("tech");
+var techBtn = document.getElementById("techBtn");
 var current = null, previewPending = 0;
 
 function currentItems(){
@@ -2246,7 +2259,7 @@ function showCard(c){
     '<dt>картинка</dt><dd>' + svgBytes + ' байт · <b>' + Math.ceil(svgBytes / 127) + '</b> ячеек змейки</dd>' +
     '<dt>приметы</dt><dd>' + (c.tr.rare.length ? c.tr.rare.join(", ") : "—") + '</dd>';
   ggOut.innerHTML = ggPreview(c);
-  if(!metaOut.hidden) metaOut.textContent = metaText(c);
+  if(tech && !tech.hidden) metaOut.textContent = metaText(c);
 }
 
 /* Имя и описание — ровно то, что положит контракт в get_nft_content:
@@ -2497,11 +2510,11 @@ cardPlayBtn.addEventListener("click", function(){
   if(current) playFromBytes(current.bytes);
 });
 
-metaBtn.addEventListener("click", function(){
-  metaOut.hidden = !metaOut.hidden;
-  metaBtn.setAttribute("aria-expanded", metaOut.hidden ? "false" : "true");
-  metaBtn.textContent = metaOut.hidden ? "Показать метаданные" : "Скрыть метаданные";
-  if(!metaOut.hidden && current) metaOut.textContent = metaText(current);
+techBtn.addEventListener("click", function(){
+  tech.hidden = !tech.hidden;
+  techBtn.setAttribute("aria-expanded", tech.hidden ? "false" : "true");
+  techBtn.textContent = tech.hidden ? "Показать техническую информацию" : "Скрыть техническую информацию";
+  if(!tech.hidden && current) metaOut.textContent = metaText(current);
 });
 
 /* Кочка на поляне.
