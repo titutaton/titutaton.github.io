@@ -3025,7 +3025,8 @@ window.addEventListener("hashchange", route);
    из теста рядом с get-методом в @ton/sandbox, и SVG обязан совпасть побайтово. */
 window.TTN = {
   encodeSong:encodeSong, decodeSong:decodeSong, sha256:sha256,
-  prngFrom:prngFrom, traitsOf:traitsOf, renderCard:renderCard, attrsOf:attrsOf
+  prngFrom:prngFrom, traitsOf:traitsOf, renderCard:renderCard, attrsOf:attrsOf,
+  unbocSong:unbocSong
 };
 
 document.addEventListener("keydown", function(e){
@@ -3114,14 +3115,75 @@ function imageOf(meta){
 function cardOf(item){
   var meta = item.metadata || {};
   var t = traitsOf(meta);
+  /* Пока индексатор не обогатил карточку, metadata пуста: имени и картинки
+     там нет. Тогда имя собираем из номера, а картинку берём из превью tonapi
+     — иначе в галерее висела бы безымянная карточка без картинки. Трейты
+     появятся, когда индексатор дочитает контент. */
+  var img = imageOf(meta);
+  if(!img){
+    var pv = (item.previews || []).slice().sort(function(a, b){
+      return (parseInt(b.resolution, 10) || 0) - (parseInt(a.resolution, 10) || 0);
+    })[0];
+    if(pv && pv.url) img = pv.url;
+  }
+  var idx = typeof item.index === "number" ? item.index : 0;
+  var name = meta.name || ("Титутатон #" + (idx + 1));
   return {
     address: item.address,
-    name: meta.name || "Титутатон",
-    image: imageOf(meta),
+    index: idx,
+    name: name,
+    image: img,
     traits: t,
-    search: ((meta.name || "") + " " +
+    /* Индексатор ещё не обогатил (нет имени) — дорисуем из чейна сами. */
+    pending: !meta.name,
+    search: (name + " " +
       t.map(function(x){ return x.type + ": " + x.value; }).join(" ")).toLowerCase(),
   };
+}
+
+function fillTraits(f, traits){
+  f.textContent = "";
+  traits.forEach(function(x){
+    var s = document.createElement("a");
+    s.className = "fact" + (x.rare ? " rare" : "");
+    s.href = "#view=gallery&q=" + encodeURIComponent(x.type + ": " + x.value);
+    var ty = document.createElement("span");
+    ty.className = "fact-type";
+    ty.textContent = x.type;
+    var va = document.createElement("span");
+    va.className = "fact-value";
+    va.textContent = x.value;
+    s.appendChild(ty);
+    s.appendChild(va);
+    f.appendChild(s);
+  });
+}
+
+/* Запасной путь, когда tonapi не отдаёт содержимое карточки (пустые
+   metadata): тянем байты песни гет-методом и рисуем карточку тем же
+   эталонным кодеком, что и главная. Картинка и трейты получаются ровно те
+   же — контракт рисует из этих же байтов. */
+function enrichFromChain(c){
+  if(!window.TTN || !window.TTN.unbocSong) return;
+  fetch(CFG.API + "/blockchain/accounts/" + c.address + "/methods/get_nft_data")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(!j || !j.success || !j.stack || j.stack.length < 5) return;
+      var bytes = window.TTN.unbocSong(j.stack[4].cell);
+      if(!bytes) return;
+      var song = window.TTN.decodeSong(bytes);
+      if(!song) return;
+      var tr = window.TTN.traitsOf(song);
+      var hex = window.TTN.sha256(bytes);
+      var svg = window.TTN.renderCard(song, hex, c.index + 1, tr);
+      /* Своя картинка из тех же байтов надёжнее превью индексатора (оно
+         может быть заглушкой): всегда ставим её. */
+      if(c._img)
+        c._img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
+      if(c._traitsEl) fillTraits(c._traitsEl, traitsOf({ attributes: window.TTN.attrsOf(song, tr) }));
+      c.pending = false;
+    })
+    .catch(function(){});
 }
 
 function nodeOf(c){
@@ -3139,6 +3201,7 @@ function nodeOf(c){
   pic.setAttribute("aria-label", c.name + " — слушать");
   pic.appendChild(img);
   el.appendChild(pic);
+  c._img = img;
 
   var body = document.createElement("div");
   body.className = "gbody";
@@ -3148,27 +3211,16 @@ function nodeOf(c){
   h.textContent = c.name;
   body.appendChild(h);
 
-  if(c.traits.length){
-    var f = document.createElement("div");
-    f.className = "traits";
-    c.traits.forEach(function(x){
-      var s = document.createElement("a");
-      s.className = "fact" + (x.rare ? " rare" : "");
-      s.href = "#view=gallery&q=" + encodeURIComponent(x.type + ": " + x.value);
-      var ty = document.createElement("span");
-      ty.className = "fact-type";
-      ty.textContent = x.type;
-      var va = document.createElement("span");
-      va.className = "fact-value";
-      va.textContent = x.value;
-      s.appendChild(ty);
-      s.appendChild(va);
-      f.appendChild(s);
-    });
-    body.appendChild(f);
-  }
+  var f = document.createElement("div");
+  f.className = "traits";
+  fillTraits(f, c.traits);
+  body.appendChild(f);
+  c._traitsEl = f;
 
   el.appendChild(body);
+
+  /* Пустые метаданные у индексатора — дорисовываем из чейна. */
+  if(c.pending) enrichFromChain(c);
   return el;
 }
 
