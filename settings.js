@@ -8,7 +8,7 @@
 window.TTN_NET = {
     /* Адрес коллекции. Пусто — значит минтить ещё некуда, и страницы это
        честно говорят вместо того, чтобы делать вид. */
-    COLLECTION: 'kQBoS2cKVLtVoCWD50BITlwosmBukuSTnt6iz3ZndGm3NfTu',
+    COLLECTION: 'kQBHmqSzRdGoOlToZhRofsafDh5TjZp8bRtCWwObBgxvWpKe',
 
     NETWORK: '-3',                                /* -3 тестнет, -239 мейннет */
     API: 'https://testnet.tonapi.io/v2',
