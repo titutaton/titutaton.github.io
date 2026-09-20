@@ -19,5 +19,26 @@ window.TTN_NET = {
     /* Манифест описывает приложение кошельку: своё имя и значок вместо
        чужого — файл лежит рядом на GitHub Pages. */
     MANIFEST: 'https://titutaton.github.io/tonconnect-manifest.json',
+    /* Своя копия TON Connect UI лежит рядом: на TON Site (tituta.ton) и при
+       блокировке CDN чеканка всё равно должна подниматься. CDN — запасной. */
+    UI_LOCAL: 'js/tonconnect-ui.min.js',
     UI_CDN: 'https://cdn.jsdelivr.net/npm/@tonconnect/ui@2/dist/tonconnect-ui.min.js',
 };
+
+/*
+ * Мейннет — на день старта. Активный объект выше остаётся тестнетовым, а это
+ * шаблон: копируем, вписываем адрес коллекции и меняем сеть. Ничего, кроме
+ * этого файла, трогать не надо.
+ *
+window.TTN_NET = {
+    COLLECTION: '<мейннет-адрес коллекции>',
+    NETWORK: '-239',
+    API: 'https://tonapi.io/v2',
+    MARKET: 'https://getgems.io/collection/',
+    EXPLORER: 'https://tonviewer.com/',
+    PRICE_NANO: '300000000',
+    MANIFEST: 'https://titutaton.github.io/tonconnect-manifest.json',
+    UI_LOCAL: 'js/tonconnect-ui.min.js',
+    UI_CDN: 'https://cdn.jsdelivr.net/npm/@tonconnect/ui@2/dist/tonconnect-ui.min.js',
+};
+*/

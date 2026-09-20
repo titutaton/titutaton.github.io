@@ -47,12 +47,20 @@
 
     function loadLib() {
         if (window.TON_CONNECT_UI) return Promise.resolve();
-        return new Promise(function (ok, fail) {
-            var s = document.createElement('script');
-            s.src = CFG.UI_CDN;
-            s.onload = ok;
-            s.onerror = function () { fail(new Error('не загрузилась библиотека кошелька')); };
-            document.head.appendChild(s);
+        function loadOne(src) {
+            return new Promise(function (ok, fail) {
+                var s = document.createElement('script');
+                s.src = src;
+                s.onload = ok;
+                s.onerror = function () { fail(new Error('не загрузилась библиотека кошелька')); };
+                document.head.appendChild(s);
+            });
+        }
+        /* Сначала своя копия рядом (TON Site, блокировка CDN), затем CDN. */
+        var p = CFG.UI_LOCAL ? loadOne(CFG.UI_LOCAL) : Promise.reject(new Error('нет локальной копии'));
+        return p.catch(function () {
+            if (!CFG.UI_CDN) throw new Error('не загрузилась библиотека кошелька');
+            return loadOne(CFG.UI_CDN);
         });
     }
 
