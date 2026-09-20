@@ -891,7 +891,7 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
   var CFG = window.TTN_NET || {};
   var ref = document.referrer || "";
   if(!/^https?:\/\/([a-z0-9-]+\.)?getgems\.io\//i.test(ref)) return;
-  if(/[#&]nft=|[#&]s=|view=gallery/.test(location.hash || "")) return;
+  if(/[#&]nft=|[#&]s=/.test(location.hash || "")) return;
 
   /* Сравнивать адреса строками нельзя: EQ…/kQ…/0Q… — один и тот же адрес
      с разными тегом сети и crc16. Берём рабочую цепочку и 32-байтовый хеш. */
