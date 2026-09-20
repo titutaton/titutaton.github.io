@@ -8,12 +8,12 @@
 window.TTN_NET = {
     /* Адрес коллекции. Пусто — значит минтить ещё некуда, и страницы это
        честно говорят вместо того, чтобы делать вид. */
-    COLLECTION: 'kQBHmqSzRdGoOlToZhRofsafDh5TjZp8bRtCWwObBgxvWpKe',
+    COLLECTION: 'EQBHmqSzRdGoOlToZhRofsafDh5TjZp8bRtCWwObBgxvWikU',
 
-    NETWORK: '-3',                                /* -3 тестнет, -239 мейннет */
-    API: 'https://testnet.tonapi.io/v2',
-    MARKET: 'https://testnet.getgems.io/collection/',
-    EXPLORER: 'https://testnet.tonviewer.com/',
+    NETWORK: '-239',                              /* -3 тестнет, -239 мейннет */
+    API: 'https://tonapi.io/v2',
+    MARKET: 'https://getgems.io/collection/',
+    EXPLORER: 'https://tonviewer.com/',
     PRICE_NANO: '300000000',                      /* 0.3 TON */
 
     /* Манифест описывает приложение кошельку: своё имя и значок вместо
@@ -26,16 +26,15 @@ window.TTN_NET = {
 };
 
 /*
- * Мейннет — на день старта. Активный объект выше остаётся тестнетовым, а это
- * шаблон: копируем, вписываем адрес коллекции и меняем сеть. Ничего, кроме
- * этого файла, трогать не надо.
+ * Тестнет — если понадобится вернуться. Активный объект выше сейчас мейннет;
+ * это шаблон: копируем и подставляем тестнетовый адрес коллекции.
  *
 window.TTN_NET = {
-    COLLECTION: '<мейннет-адрес коллекции>',
-    NETWORK: '-239',
-    API: 'https://tonapi.io/v2',
-    MARKET: 'https://getgems.io/collection/',
-    EXPLORER: 'https://tonviewer.com/',
+    COLLECTION: '<тестнет-адрес коллекции>',
+    NETWORK: '-3',
+    API: 'https://testnet.tonapi.io/v2',
+    MARKET: 'https://testnet.getgems.io/collection/',
+    EXPLORER: 'https://testnet.tonviewer.com/',
     PRICE_NANO: '300000000',
     MANIFEST: 'https://titutaton.github.io/tonconnect-manifest.json',
     UI_LOCAL: 'js/tonconnect-ui.min.js',
