@@ -127,6 +127,8 @@
 
         address: function () { return account ? account.address : null; },
         friendlyAddress: function () { return account ? friendly(account.address) : null; },
+        /* сырой 0:… -> дружелюбный kQ…/UQ…: нужен для ссылок на маркетплейс */
+        friendly: function (raw) { return friendly(raw); },
         chain: function () { return account ? account.chain : null; },
 
         /** подключить, если ещё нет, и вернуть готовый кошелёк */

@@ -462,6 +462,13 @@ h1 .s:nth-child(4){color:var(--ton-deep)}
 /* display:inline-flex выше перебил бы атрибут hidden: у кнопок в разметке
    он есть, и без этого спрятанные показывались. */
 .mint-side .controls .btn[hidden]{display:none}
+/* Ссылки карточки в просмотре: маркетплейс, обозреватель, владелец. */
+.cardlinks{display:flex;flex-direction:column;gap:6px;margin-top:14px;font-size:13px}
+.cardlinks[hidden]{display:none}
+.cardlinks a{color:var(--accent);text-decoration:none}
+.cardlinks a:hover{text-decoration:underline}
+.cardlinks p{margin:0;color:var(--ink-soft)}
+.cardlinks p a{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px}
 /* «Отчеканить» — на всю ширину; «Слушать» с «Миксовать» делят ряд поровну. */
 #mintBtn{grid-column:1 / -1}
 .btn{
@@ -824,6 +831,11 @@ html.asleep .bob, html.asleep .eyes{animation-play-state:paused !important}
           <button class="btn" id="mintBtn" type="button">Отчеканить</button>
           <button class="btn ghost" id="cardPlayBtn" type="button" hidden>Слушать</button>
           <button class="btn ghost" id="mixBtn" type="button" hidden>Миксовать</button>
+        </div>
+        <div class="cardlinks" id="cardLinks" hidden>
+          <a id="mktLink" target="_blank" rel="noopener">Смотреть на маркетплейсе</a>
+          <a id="expLink" target="_blank" rel="noopener">Смотреть в обозревателе</a>
+          <p id="ownerLine" hidden>Владелец: <a id="ownerLink" target="_blank" rel="noopener"></a></p>
         </div>
         <p class="note" id="mintNote">Точную сумму покажет кошелёк.</p>
         <div class="thanks" id="thanks" hidden>
@@ -2686,6 +2698,55 @@ document.getElementById("mintBtn").addEventListener("click", function(){
    паузы. Лента при этом может содержать что угодно другое. */
 var cardPlayBtn = document.getElementById("cardPlayBtn");
 var mixBtn = document.getElementById("mixBtn");
+var cardLinks = document.getElementById("cardLinks");
+var mktLink = document.getElementById("mktLink");
+var expLink = document.getElementById("expLink");
+var ownerLine = document.getElementById("ownerLine");
+var ownerLink = document.getElementById("ownerLink");
+var currentAddress = null;   /* адрес открытой карточки, если известен */
+var currentTokenId = 0;
+
+/* В просмотре действия переезжают в ленту — рядом с плеером, — а на карточке
+   остаются только ссылки. В чеканке возвращаются обратно. */
+var tapeRow = document.querySelector(".console .controls");
+var cardRow = document.querySelector(".mint-side .controls");
+function placeActions(inTape){
+  if(!tapeRow || !cardRow) return;
+  var row = inTape ? tapeRow : cardRow;
+  row.appendChild(cardPlayBtn);
+  row.appendChild(mixBtn);
+}
+
+/* Ссылки карточки: маркетплейс и обозреватель — на саму карточку, плюс
+   владелец. Адрес известен, если пришли по #nft=; если по #s= (из окна
+   минта) — спросим у коллекции по номеру. */
+function setupCardLinks(){
+  if(!cardLinks) return;
+  var show = function(addr){
+    var mktAddr = (window.Wallet && /^\d+:/.test(addr)) ? window.Wallet.friendly(addr) : addr;
+    mktLink.href = CFG.MARKET + COLLECTION + "/" + mktAddr;
+    expLink.href = CFG.EXPLORER + addr;
+    cardLinks.hidden = false;
+    ownerLine.hidden = true;
+    ownerLink.textContent = "";
+    ownerLink.removeAttribute("href");
+    fetch(API + "/nfts/" + addr).then(function(r){ return r.json(); }).then(function(j){
+      var o = j && j.owner && j.owner.address;
+      if(!o) return;
+      ownerLink.textContent = o.slice(0, 6) + "…" + o.slice(-6);
+      ownerLink.href = CFG.EXPLORER + o;
+      ownerLine.hidden = false;
+    }).catch(function(){});
+  };
+  if(currentAddress){ show(currentAddress); return; }
+  if(currentTokenId > 0 && COLLECTION){
+    fetch(API + "/blockchain/accounts/" + COLLECTION +
+      "/methods/get_nft_address_by_index?args=" + (currentTokenId - 1))
+      .then(function(r){ return r.json(); })
+      .then(function(j){ var a = j && j.decoded && j.decoded.address; if(a) show(a); })
+      .catch(function(){});
+  }
+}
 
 /* «Миксовать» из просмотра: возвращаем страницу в режим инструмента — песня
    уже лежит в ленте (её туда положил openCard), можно править и чеканить
@@ -2697,6 +2758,8 @@ mixBtn.addEventListener("click", function(){
   /* Уходим из просмотра — «Слушать» тут тоже лишняя: карточка снова стала
      инструментом, а играет лента. */
   cardPlayBtn.hidden = true;
+  placeActions(false);
+  if(cardLinks) cardLinks.hidden = true;
   try{
     history.replaceState(null, "", location.pathname + location.search +
       location.hash.replace(/[&]?enjoy=1/, ""));
@@ -2928,9 +2991,17 @@ function openFromHash(){
     if(previewPending){ cancelAnimationFrame(previewPending); previewPending = 0; }
 
     showCard(c);
-    if(enjoy) document.body.classList.add("enjoy");
-    /* «Слушать» и «Миксовать» — это действия просмотра; в чеканке им нечего
-       делать (лента и так играет черновик). Обе кнопки принадлежат enjoy. */
+    currentTokenId = tokenId;
+    /* «Слушать» и «Миксовать» — действия просмотра: в ленте, рядом с плеером.
+       На карточке вместо них — ссылки на маркетплейс/обозреватель. */
+    if(enjoy){
+      document.body.classList.add("enjoy");
+      placeActions(true);
+      setupCardLinks();
+    } else {
+      placeActions(false);
+      if(cardLinks) cardLinks.hidden = true;
+    }
     mixBtn.hidden = !enjoy;
     cardPlayBtn.hidden = !enjoy;
     cardState.textContent = tokenId ? "#" + tokenId + " по ссылке" : "по ссылке";
@@ -2949,6 +3020,7 @@ function openFromHash(){
   if(sMatch && sMatch[1].length % 2 === 0){
     var b = new Uint8Array(sMatch[1].length / 2), i;
     for(i = 0; i < b.length; i++) b[i] = parseInt(sMatch[1].substr(i * 2, 2), 16);
+    currentAddress = null;                 /* пришли байтами — адрес неизвестен */
     openCard(b, tokenId);
     return;
   }
@@ -2957,6 +3029,7 @@ function openFromHash(){
      0:59a6…, каким его отдаёт индексатор. Оба он же и понимает. */
   var addr = /[#&]nft=(-?\d:[0-9a-fA-F]{64}|[A-Za-z0-9_-]{48})/.exec(hash);
   if(!addr) return;
+  currentAddress = addr[1];
   cardState.textContent = "спрашиваем у чейна…";
   fetch(API + "/blockchain/accounts/" + addr[1] + "/methods/get_nft_data")
     .then(function(r){ return r.json(); })
